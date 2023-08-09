@@ -1,0 +1,59 @@
+<html>
+  <head>1</head>
+<body>
+  <span id="complex-number"></span>
+<div id="container"></div>
+
+<script type="x-shader/x-vertex" id="vertexShader">
+
+varying vec2 vPos;
+
+void main() {
+  gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position,1.0);
+  vPos = position.xy;
+}
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentShader">
+
+uniform vec2 uC;
+uniform vec2 uResolution;
+
+varying vec2 vPos;
+
+const int max_iterations = 255;
+
+vec2 complex_square( vec2 v ) {
+	return vec2(
+		v.x * v.x - v.y * v.y,
+		v.x * v.y * 2.0
+	);
+}
+
+void main() {
+    vec2 v = vPos - uResolution / min(uResolution.x, uResolution.y);
+    v *= 15.0 / min(uResolution.x, uResolution.y);
+    float scale = 0.1;
+
+
+	int count = 0;
+
+	for ( int i = 0 ; i < max_iterations; i++ ) {
+		v = uC + complex_square( v );
+		if ( dot( v, v ) > 4.0 ) {
+			count = i;
+			break;
+		}
+	}
+
+	gl_FragColor = vec4( float( count ) * scale );
+}
+
+</script>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
+</body>
+</html>
