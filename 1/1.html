@@ -1,56 +1,79 @@
+<!DOCTYPE html>
 <html>
 <body>
-<canvas id="canvas" width="200" height="200"></canvas>
-<div id="div" style="width:200px;height:200px;border:solid 1px red;"></div>
-<input type="text" id="textx" />
-<input type="text" id="texty" />
+<canvas id="ca" width="400" height="400"></canvas>
 <script>
-const canvas=document.getElementById('canvas')
-    const ct=canvas.getContext('2d')
-    var cx=parseFloat(document.getElementById("textx"))
-    var cy=parseFloat(document.getElementById("texty"))
-    function f(x,c){    
-let xr=x[0]
-let xi=x[1]
-return [xr*xr-xi*xi+c[0],2*xr*xi+c[1]]
+var ca=document.getElementById("ca")
+var ctx=ca.getContext('2d')
+function sqr(x){return [x[0]*x[0]-x[1]*x[1],2*x[0]*x[1]]} //complex number functions
+function cbr(x){let u=x[0];let v=x[1];return [u**3-3*u*v*v,3*u*u*v-v**3]}
+function mult(x,y){return [x[0]*y[0]-x[1]*y[1],x[0]*y[1]+x[1]*y[0]]}
+function cAdd(x,y){return [x[0]+y[0],x[1]+y[1]]}
+function abs(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1])}
+function cRec(x){return [x[0]/abs(x),-x[1]/abs(x)]}
+function multR(x,y){return [x[0]*y,x[1]*y]}
+function cPow(x,y){
+let r=abs(x);let t=Math.atan2(x[1],x[0])*y;return [Math.cos(t)*(r**y),Math.sin(t)*(r**y)]
 }
-    function abs(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1]);}
-    var maxiter=32
-var escv=16
-var constant=[cx,cy]
-var R=50
+
+function fJ(x,c){return cAdd(sqr(x),c)} //julia set
+function fN(x,c){return cAdd([(1-R/3)*x[0]+c[0],(1-R/3)*x[1]+c[1]],multR(cRec(sqr(x),R/3)))} //nova fractal z^3-1
+function fBs(x,c){return [x[0]*x[0]-x[1]*x[1]-c[0],Math.abs(x[0]*x[1])*2-c[1]]} //burning ship
+function fL(x,c){return mult([x[0]-x[0]*x[0]+x[1]*x[1],x[1]-2*x[0]*x[1]],c)} //lambda fractal
+function fBf(x,c){let u=Math.abs(x[0]);let v=Math.abs(x[1]);return [x[0]*x[0]-x[1]*x[1]-u-c[0],2*u*v-v-c[1]]}
+function f(x,c){return fJ(x,c)}
+
+var mode=0 //0 for divergent,1 for convergent,2 for range
+var type=1 //0 for julia,1 for mandelbrot
+
+var maxiter=30;
+var escv=2
+var R=1
+var cx=0
+var cy=0
+var con=[cx,cy]
+var cup=4;var cdown=-4;var cleft=-4;var cright=4
+function tr(x,xmin,xmax){return x*(xmax-xmin)/400+xmin}
+function convergent(x){var b0;if(mode==0){if(x<escv){b0=1}else{b0=0}}else if(mode==1){if(x>1/escv){b0=1}else{b0=0}}else{if(Math.abs(x-(escv+1/escv))<escv-1/escv){b0=1}else{b0=0}};return b0}
+var colorR=[0,255,255,255];colorG=[0,255,255,0];colorB=[150,255,0,0]
+function intp(x,y,t){return x+t*(y-x)}
+function Intp(x,t){
+var cp=Math.floor(t);np=Math.ceil(t)
+return intp(x[cp],x[np],t-Math.floor(t))
+}
+var mp=maxiter-1
+function ir(x){return Math.floor(Intp(colorR,x*3/mp))}
+function ig(x){return Math.floor(Intp(colorG,x*3/mp))}
+function ib(x){return Math.floor(Intp(colorB,x*3/mp))}
 function conv(x){
-var isConv=true
-var point=[(x[0]-100)/R,(x[1]-100)/R]
-let ita=0
+var cn=maxiter;var point;var ita=0;var ci
+if(type==0){ci=con;point=trp(x)}else{ci=trp(x);point=con}
 while(ita<maxiter){
-if(abs(point)>escv){
-isConv=false
+if(convergent(abs(point))==0){
+cn=ita
 break
 }
-point=f(point,constant)
+point=f(point,ci)
 ita++
 }
-return isConv
+return cn
 }
-    function draw(){
-for(var i=0;i<=200;i++){
-for(var j=0;j<=200;j++){
-if(conv([i,j])==true){
-ct.fillRect(i,j,1,1)
+function trp(x){return [tr(x[0],cleft,cright),tr(x[1],cdown,cup)]}
+function draw(){
+for(i=0;i<=400;i++){
+for(j=0;j<=400;j++){
+let c1=conv([i,j])
+const Cr=ir(c1);const Cg=ig(c1);const Cb=ib(c1)
+if(c1==maxiter){
+ctx.fillStyle='rgba(0,0,0,1)'
+}else{
+ctx.fillStyle='rgba('+Cr+','+Cg+','+Cb+',1)'
 }
+ctx.fillRect(i,j,1,1)
 }
 }
 }
 draw()
-var div1 = document.getElementById("div");
-div1.onmousemove=function (event){
-var event = event || window.event;
-var tx = document.getElementById("textx");
-var ty = document.getElementById("texty");
-tx.value=event.offsetX/200;
-ty.value=event.offsetY/200;
-    }
 </script>
 </body>
 </html>
