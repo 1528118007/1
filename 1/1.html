@@ -9,29 +9,34 @@ function sqr(x){return [x[0]*x[0]-x[1]*x[1],2*x[0]*x[1]]} //complex number funct
 function cbr(x){let u=x[0];let v=x[1];return [u**3-3*u*v*v,3*u*u*v-v**3]}
 function mult(x,y){return [x[0]*y[0]-x[1]*y[1],x[0]*y[1]+x[1]*y[0]]}
 function cAdd(x,y){return [x[0]+y[0],x[1]+y[1]]}
+function cSubt(x,y){return [x[0]-y[0],x[1]-y[1]]}
 function abs(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1])}
-function cRec(x){return [x[0]/abs(x),-x[1]/abs(x)]}
+function cRec(x){let r1=x[0]*x[0]+x[1]*x[1];return [x[0]/r1,-x[1]/r1]}
 function multR(x,y){return [x[0]*y,x[1]*y]}
 function cPow(x,y){
 let r=abs(x);let t=Math.atan2(x[1],x[0])*y;return [Math.cos(t)*(r**y),Math.sin(t)*(r**y)]
 }
-
+var id=0
 function fJ(x,c){return cAdd(sqr(x),c)} //julia set
-function fN(x,c){return cAdd([(1-R/3)*x[0]+c[0],(1-R/3)*x[1]+c[1]],multR(cRec(sqr(x),R/3)))} //nova fractal z^3-1
-function fBs(x,c){return [x[0]*x[0]-x[1]*x[1]-c[0],Math.abs(x[0]*x[1])*2-c[1]]} //burning ship
+function fN(x,c){return cAdd([(1-R/3)*x[0]+c[0],(1-R/3)*x[1]+c[1]],multR(cRec(sqr(x)),R/3))} //nova fractal z^3-1
+function fBs(x,c){return [x[0]*x[0]-x[1]*x[1]-c[0],Math.abs(x[0]*x[1])*2+c[1]]} //burning ship
 function fL(x,c){return mult([x[0]-x[0]*x[0]+x[1]*x[1],x[1]-2*x[0]*x[1]],c)} //lambda fractal
-function fBf(x,c){let u=Math.abs(x[0]);let v=Math.abs(x[1]);return [x[0]*x[0]-x[1]*x[1]-u-c[0],2*u*v-v-c[1]]}
-function f(x,c){return fJ(x,c)}
+function fBf(x,c){let u=Math.abs(x[0]);let v=Math.abs(x[1]);return [x[0]*x[0]-x[1]*x[1]-u-c[0],2*u*v-v+c[1]]} //buffalo fractal
+function fM1(x,c){return sqr(mult(cAdd(sqr(x),[c[0]-1,c[1]]),cRec([2*x[0]+c[0]-2,2*x[1]+c[1]])))} //magnet fractal 1
+function fM2(x,c){let x1=[x[0]-1,x[1]];return sqr(cAdd(1,mult(cbr(x1),cRec(cAdd(sqr(c),multR(mult(x1,[x[0]+c[0]-1,x[1]+c[1]]),-3))))))} //magnet fractal 2
+function fCe(x,c){return cAdd(sqr(x),[-c[0]-2*Math.min(0,x[0]*x[0]-x[1]*x[1]),x[1]])}
+function f(x,c){var o;if(id==0){o=fJ(x,c)}else if(id==1){o=fN(x,c)}else if(id==2){o=fBs(x,c)}else if(id==3){o=fL(x,c)}else if(id==4){o=fBf(x,c)};return o}
 
 var mode=0 //0 for divergent,1 for convergent,2 for range
-var type=1 //0 for julia,1 for mandelbrot
+var type=1 //0 for julia,1 for mandelbrot,2 for z0=c
 
-var maxiter=30;
-var escv=2
+var maxiter=40;
+var escv=16
 var R=1
 var cx=0
 var cy=0
 var con=[cx,cy]
+var inv=0
 var cup=4;var cdown=-4;var cleft=-4;var cright=4
 function tr(x,xmin,xmax){return x*(xmax-xmin)/400+xmin}
 function convergent(x){var b0;if(mode==0){if(x<escv){b0=1}else{b0=0}}else if(mode==1){if(x>1/escv){b0=1}else{b0=0}}else{if(Math.abs(x-(escv+1/escv))<escv-1/escv){b0=1}else{b0=0}};return b0}
@@ -46,19 +51,18 @@ function ir(x){return Math.floor(Intp(colorR,x*3/mp))}
 function ig(x){return Math.floor(Intp(colorG,x*3/mp))}
 function ib(x){return Math.floor(Intp(colorB,x*3/mp))}
 function conv(x){
-var cn=maxiter;var point;var ita=0;var ci
-if(type==0){ci=con;point=trp(x)}else{ci=trp(x);point=con}
+var cn=maxiter;var point;var pold=[0,0];var ita=0;var ci
+if(type==0){ci=con;point=Trp(x)}else if(type==1){ci=Trp(x);point=con}else{ci=con;point=con}
 while(ita<maxiter){
-if(convergent(abs(point))==0){
-cn=ita
-break
-}
+if(convergent(abs(cSubt(point,pold)))==0){cn=ita;break}
+pold=point
 point=f(point,ci)
 ita++
 }
 return cn
 }
 function trp(x){return [tr(x[0],cleft,cright),tr(x[1],cdown,cup)]}
+function Trp(x){var o;if(inv==0){o=trp(x)}else{o=cRec(trp(x))};return o}
 function draw(){
 for(i=0;i<=400;i++){
 for(j=0;j<=400;j++){
@@ -74,6 +78,51 @@ ctx.fillRect(i,j,1,1)
 }
 }
 draw()
+
+var ratio=2
+var cs=[0,0]
+ca.onclick = function (event) {
+var event = event || window.event
+cs=trp([event.offsetX,event.offsetY])
+zoom()
+draw()}
+function zoom(){cup=(cup-cs[1])/ratio+cs[1];cdown=(cdown-cs[1])/ratio+cs[1];cleft=(cleft-cs[0])/ratio+cs[0];cright=(cright-cs[0])/ratio+cs[0]}
+function zoomOut(){var cX=(cleft+cright)/2;var cY=(cup+cdown)/2;
+cup=intp(cY,cup,ratio);cdown=intp(cY,cdown,ratio);cleft=intp(cX,cleft,ratio);cright=intp(cX,cright,ratio)}
+
+
 </script>
+<br>
+<button onclick="zoomOut()">zoom out</button><br>
+Max iterations:<input type="text" id="maxiter" value="40"><br>
+Escape value:<input type="text" id="escv" value="16"><br>
+Constant:<input type="text" id="cx" value="0">+<input type="text" id="cy" value="0">i<br>Relation number:<input type='text' id='R' value='1'><br>
+Type:(0 for julia,1 for mandelbrot,2 for z_0=c)<input type="text" id="type" value="1"><br>
+Mode:<select id="mode" onchange='getSelectValue(this.value)'><option value='0'>divergent</option><option value='1'>convergent</option><option value='2'>bailout</option></select>
+Select fractal:<select id="frac">
+<option value='0'>mandelbrot set</option>
+<option value='1'>nova fractal</option>
+<option value='2'>burning ship fractal</option>
+<option value='3'>lambda fractal</option>
+<option value='4'>buffalo fractal</option>
+<option value='5'>magnet fractal 1</option>
+<option value='6'>magnet fractal 2</option>
+<option value='7'>celtic fractal</option>
+</select><br>
+0 for normal fractal,1 for inverted fractal:<input type="text" id="inv" value="0">
+<script>
+var maxiterE=document.getElementById('maxiter');var escvE=document.getElementById('escv');var RE=document.getElementById('R');var cxE=document.getElementById('cx');var cyE=document.getElementById('cy');var typeE=document.getElementById('type');
+modeE=document.getElementById('mode');var frac=document.getElementById('frac');var invE=document.getElementById('inv')
+maxiterE.onchange=function(){maxiter=maxiterE.value;draw()}
+escvE.onchange=function(){escv=escvE.value;draw()}
+cxE.onchange=function(){cx=cxE.value;draw()}
+cyE.onchange=function(){cy=cyE.value;draw()}
+RE.onchange=function(){R=RE.value;draw()}
+typeE.onchange=function(){type=typeE.value;draw()}
+modeE.onchange=function(){mode=modeE.value;draw()}
+frac.onchange=function(){id=frac.value;draw()}
+invE.onchange=function(){inv=invE.value;draw()}
+</script>
+<br>
 </body>
 </html>
