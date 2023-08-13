@@ -16,16 +16,24 @@ function multR(x,y){return [x[0]*y,x[1]*y]}
 function cPow(x,y){
 let r=abs(x);let t=Math.atan2(x[1],x[0])*y;return [Math.cos(t)*(r**y),Math.sin(t)*(r**y)]
 }
+function sgn(x){if(x==0){return 0}else{return x/Math.abs(x)}}
 var id=0
 function fJ(x,c){return cAdd(sqr(x),c)} //julia set
 function fN(x,c){return cAdd([(1-R/3)*x[0]+c[0],(1-R/3)*x[1]+c[1]],multR(cRec(sqr(x)),R/3))} //nova fractal z^3-1
-function fBs(x,c){return [x[0]*x[0]-x[1]*x[1]-c[0],Math.abs(x[0]*x[1])*2+c[1]]} //burning ship
+function fBs(x,c){return [x[0]*x[0]-x[1]*x[1]-c[0],Math.abs(x[0]*x[1])*2-c[1]]} //burning ship
 function fL(x,c){return mult([x[0]-x[0]*x[0]+x[1]*x[1],x[1]-2*x[0]*x[1]],c)} //lambda fractal
-function fBf(x,c){let u=Math.abs(x[0]);let v=Math.abs(x[1]);return [x[0]*x[0]-x[1]*x[1]-u-c[0],2*u*v-v+c[1]]} //buffalo fractal
+function fBf(x,c){let u=Math.abs(x[0]);let v=Math.abs(x[1]);return [x[0]*x[0]-x[1]*x[1]-u-c[0],2*u*v-v-c[1]]} //buffalo fractal
 function fM1(x,c){return sqr(mult(cAdd(sqr(x),[c[0]-1,c[1]]),cRec([2*x[0]+c[0]-2,2*x[1]+c[1]])))} //magnet fractal 1
 function fM2(x,c){let x1=[x[0]-1,x[1]];return sqr(cAdd(1,mult(cbr(x1),cRec(cAdd(sqr(c),multR(mult(x1,[x[0]+c[0]-1,x[1]+c[1]]),-3))))))} //magnet fractal 2
 function fCe(x,c){return cAdd(sqr(x),[-c[0]-2*Math.min(0,x[0]*x[0]-x[1]*x[1]),x[1]])}
-function f(x,c){var o;if(id==0){o=fJ(x,c)}else if(id==1){o=fN(x,c)}else if(id==2){o=fBs(x,c)}else if(id==3){o=fL(x,c)}else if(id==4){o=fBf(x,c)};return o}
+function fB1(x,c){return mult(c,[x[0]-sgn(x[0]),x[1]])}
+function fB2(x,c){return mult(c,[x[0]-sgn(x[0]*c[1]+x[1]*c[0]),x[1]])}
+function fB3(x,c){return cAdd(sqr(x),[c[0]*Math.min(0,x[0])-1,c[1]*Math.min(0,x[0])])}
+function fj(x,c){return cAdd(c,cPow(x,ex))}
+function fn(x,c){return cAdd(cAdd(c,multR(x,1-R/ex)),multR(cPow(x,1-ex),R/ex))}
+function fP(x,c){return cAdd(sqr(x),[x[2]*R+c[0],x[3]*R+c[1]])}
+
+function f(x,c){var o;if(id==0){o=fJ(x,c)}else if(id==1){o=fN(x,c)}else if(id==2){o=fBs(x,c)}else if(id==3){o=fL(x,c)}else if(id==4){o=fBf(x,c)}else if(id==5){o=fM1(x,c)}else if(id==6){o=fM2(x,c)}else if(id==7){o=fCe(x,c)}else if(id==8){o=fB1(x,c)}else if(id==9){o=fB2(x,c)}else if(id==10){o=fB3(x,c)}else if(id==11){o=fj(x,c)}else if(id==12){o=fn(x,c)}else if(id==13){o=fP(x,c)};return o}
 
 var mode=0 //0 for divergent,1 for convergent,2 for range
 var type=1 //0 for julia,1 for mandelbrot,2 for z0=c
@@ -37,9 +45,10 @@ var cx=0
 var cy=0
 var con=[cx,cy]
 var inv=0
+var ex=2
 var cup=4;var cdown=-4;var cleft=-4;var cright=4
+function convergent(x){var b0;if(mode==0){if(x<escv){b0=1}else{b0=0}}else if(mode==1){if(x>1/escv){b0=1}else{b0=0}}else{if(Math.abs(x-(escv+1/escv)/2)<(escv-1/escv)/2){b0=1}else{b0=0}};return b0}
 function tr(x,xmin,xmax){return x*(xmax-xmin)/400+xmin}
-function convergent(x){var b0;if(mode==0){if(x<escv){b0=1}else{b0=0}}else if(mode==1){if(x>1/escv){b0=1}else{b0=0}}else{if(Math.abs(x-(escv+1/escv))<escv-1/escv){b0=1}else{b0=0}};return b0}
 var colorR=[0,255,255,255];colorG=[0,255,255,0];colorB=[150,255,0,0]
 function intp(x,y,t){return x+t*(y-x)}
 function Intp(x,t){
@@ -51,17 +60,18 @@ function ir(x){return Math.floor(Intp(colorR,x*3/mp))}
 function ig(x){return Math.floor(Intp(colorG,x*3/mp))}
 function ib(x){return Math.floor(Intp(colorB,x*3/mp))}
 function conv(x){
-var cn=maxiter;var point;var pold=[0,0];var ita=0;var ci
-if(type==0){ci=con;point=Trp(x)}else if(type==1){ci=Trp(x);point=con}else{ci=con;point=con}
+var cn=maxiter;var point;let pold=[0,0];var ita=0;var ci
+if(type==0){ci=con;point=Trp(x)}else if(type==1){ci=Trp(x);point=con}else{ci=Trp(x);point=Trp(x)}
+point=point.concat([0,0])
 while(ita<maxiter){
 if(convergent(abs(cSubt(point,pold)))==0){cn=ita;break}
 pold=point
-point=f(point,ci)
+point=f(point,ci).concat(pold)
 ita++
 }
 return cn
 }
-function trp(x){return [tr(x[0],cleft,cright),tr(x[1],cdown,cup)]}
+function trp(x){return [tr(x[0],cleft,cright),tr(x[1],cup,cdown)]}
 function Trp(x){var o;if(inv==0){o=trp(x)}else{o=cRec(trp(x))};return o}
 function draw(){
 for(i=0;i<=400;i++){
@@ -93,9 +103,9 @@ cup=intp(cY,cup,ratio);cdown=intp(cY,cdown,ratio);cleft=intp(cX,cleft,ratio);cri
 
 </script>
 <br>
-<button onclick="zoomOut()">zoom out</button><br>
+<button onclick="zoomOut();draw()">zoom out</button><button onclick='cup=4;cdown=-4;cleft=-4;cright=4;draw()'>reset</button><br>
 Max iterations:<input type="text" id="maxiter" value="40"><br>
-Escape value:<input type="text" id="escv" value="16"><br>
+Escape value:<input type="text" id="escv" value="16"> Exponent:<input type="text" id="ex" value="2"><br>
 Constant:<input type="text" id="cx" value="0">+<input type="text" id="cy" value="0">i<br>Relation number:<input type='text' id='R' value='1'><br>
 Type:(0 for julia,1 for mandelbrot,2 for z_0=c)<input type="text" id="type" value="1"><br>
 Mode:<select id="mode" onchange='getSelectValue(this.value)'><option value='0'>divergent</option><option value='1'>convergent</option><option value='2'>bailout</option></select>
@@ -108,21 +118,29 @@ Select fractal:<select id="frac">
 <option value='5'>magnet fractal 1</option>
 <option value='6'>magnet fractal 2</option>
 <option value='7'>celtic fractal</option>
+<option value='8'>barnsley fractal 1</option>
+<option value='9'>barnsley fractal 2</option>
+<option value='10'>barnsley fractal 3</option>
+<option value='11'>multibrot</option>
+<option value='12'>nova fractal z^n-1</option>
+<option value='13'>phoenix fractal</option>
 </select><br>
 0 for normal fractal,1 for inverted fractal:<input type="text" id="inv" value="0">
 <script>
 var maxiterE=document.getElementById('maxiter');var escvE=document.getElementById('escv');var RE=document.getElementById('R');var cxE=document.getElementById('cx');var cyE=document.getElementById('cy');var typeE=document.getElementById('type');
-modeE=document.getElementById('mode');var frac=document.getElementById('frac');var invE=document.getElementById('inv')
+modeE=document.getElementById('mode');var frac=document.getElementById('frac');var invE=document.getElementById('inv');var exE=document.getElementById('ex')
 maxiterE.onchange=function(){maxiter=maxiterE.value;draw()}
 escvE.onchange=function(){escv=escvE.value;draw()}
-cxE.onchange=function(){cx=cxE.value;draw()}
-cyE.onchange=function(){cy=cyE.value;draw()}
+cxE.onchange=function(){cx=cxE.value;con=[cx,cy];draw()}
+cyE.onchange=function(){cy=cyE.value;con=[cx,cy];draw()}
 RE.onchange=function(){R=RE.value;draw()}
 typeE.onchange=function(){type=typeE.value;draw()}
 modeE.onchange=function(){mode=modeE.value;draw()}
 frac.onchange=function(){id=frac.value;draw()}
 invE.onchange=function(){inv=invE.value;draw()}
+exE.onchange=function(){ex=exE.value;draw()}
 </script>
 <br>
+<p>Note:use type 1 for nova fractals,type 2 for barnsley fractals.</p>
 </body>
 </html>
