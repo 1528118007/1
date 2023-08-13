@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="ca" width="400" height="400"></canvas>
+<script>
+var ca=document.getElementById("ca")
+var ctx=ca.getContext('2d')
+function sqr(x){return [x[0]*x[0]-x[1]*x[1],2*x[0]*x[1]]} //complex number functions
+function cbr(x){let u=x[0];let v=x[1];return [u**3-3*u*v*v,3*u*u*v-v**3]}
+function mult(x,y){return [x[0]*y[0]-x[1]*y[1],x[0]*y[1]+x[1]*y[0]]}
+function cAdd(x,y){return [x[0]+y[0],x[1]+y[1]]}
+function cSubt(x,y){return [x[0]-y[0],x[1]-y[1]]}
+function abs(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1])}
+function cRec(x){let r1=x[0]*x[0]+x[1]*x[1];return [x[0]/r1,-x[1]/r1]}
+function multR(x,y){return [x[0]*y,x[1]*y]}
+function cPow(x,y){
+let r=abs(x);let t=Math.atan2(x[1],x[0])*y;return [Math.cos(t)*(r**y),Math.sin(t)*(r**y)]
+}
+function sgn(x){if(x==0){return 0}else{return x/Math.abs(x)}}
+function fJ(x,c){return cAdd(sqr(x),c)} //julia set
+
+
+function f(x,c){return fJ(x,c)}
+var type=0 //0 for julia,1 for mandelbrot,2 for z0=c
+
+var maxiter=40;
+var escv=16
+var R=1
+var cx=0
+var cy=0
+var con=[cx,cy]
+var inv=0
+var ex=2
+var cup=4;var cdown=-4;var cleft=-4;var cright=4
+function convergent(x){var b0;if(x<escv){b0=1}else{b0=0};return b0}
+function tr(x,xmin,xmax){return x*(xmax-xmin)/400+xmin}
+var colorR=[0,255,255,255];colorG=[0,255,255,0];colorB=[150,255,0,0]
+function intp(x,y,t){return x+t*(y-x)}
+function Intp(x,t){
+var cp=Math.floor(t);np=Math.ceil(t)
+return intp(x[cp],x[np],t-Math.floor(t))
+}
+var mp=maxiter-1
+function ir(x){return Math.floor(Intp(colorR,x*3/mp))}
+function ig(x){return Math.floor(Intp(colorG,x*3/mp))}
+function ib(x){return Math.floor(Intp(colorB,x*3/mp))}
+function conv(x){
+var cn=maxiter;var point;let pold=[0,0];var ita=0;var ci
+if(type==0){ci=con;point=Trp(x)}else if(type==1){ci=Trp(x);point=con}else{ci=Trp(x);point=Trp(x)}
+point=point.concat([0,0])
+while(ita<maxiter){
+if(convergent(abs(cSubt(point,pold)))==0){cn=ita;break}
+pold=[point[0],point[1]]
+point=f(point,ci).concat(pold)
+ita++
+}
+return cn
+}
+function trp(x){return [tr(x[0],cleft,cright),tr(x[1],cup,cdown)]}
+function Trp(x){var o;if(inv==0){o=trp(x)}else{o=cRec(trp(x))};return o}
+function draw(){
+for(i=0;i<=400;i++){
+for(j=0;j<=400;j++){
+let c1=conv([i,j])
+const Cr=ir(c1);const Cg=ig(c1);const Cb=ib(c1)
+if(c1==maxiter){
+ctx.fillStyle='rgba(0,0,0,1)'
+}else{
+ctx.fillStyle='rgba('+Cr+','+Cg+','+Cb+',1)'
+}
+ctx.fillRect(i,j,1,1)
+}
+}
+}
+draw()
+
+var ratio=2
+var cs=[0,0]
+ca.onmousemove=function (event) {
+var event = event || window.event
+con=trp([event.offsetX,event.offsetY]);draw()
+}
+</script>
+<br>
+<button onclick='cup=4;cdown=-4;cleft=-4;cright=4;draw()'>reset</button><br>
+Max iterations:<input type="text" id="maxiter" value="40"><br>
+Escape value:<input type="text" id="escv" value="16"><br>
+<br>
+Type:(0 for julia,1 for mandelbrot)<input type="text" id="type" value="0"><br>
+
+0 for normal fractal,1 for inverted fractal:<input type="text" id="inv" value="0">
+<script>
+var maxiterE=document.getElementById('maxiter');var escvE=document.getElementById('escv');
+var typeE=document.getElementById('type');
+var modeE=document.getElementById('mode');
+var invE=document.getElementById('inv')
+maxiterE.onchange=function(){maxiter=maxiterE.value;draw()}
+escvE.onchange=function(){escv=escvE.value;draw()}
+typeE.onchange=function(){type=typeE.value;draw()}
+invE.onchange=function(){inv=invE.value;draw()}
+
+</script>
+<br>
+</body>
+</html>
