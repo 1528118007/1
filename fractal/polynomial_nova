@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="ca" width="400" height="400"></canvas>
+<script>
+var ca=document.getElementById("ca")
+var ctx=ca.getContext('2d')
+var coef=[-1,0,0,1]
+function abs(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1])}
+function mult(x,y){return [x[0]*y[0]-x[1]*y[1],x[0]*y[1]+x[1]*y[0]]}
+function pow(x,y){var o=x;var i=1;while(i<y){o=mult(o,x);i++};return o}
+function add(x,y){return [x[0]+y[0],x[1]+y[1]]}
+function cSubt(x,y){return [x[0]-y[0],x[1]-y[1]]}
+function poly(x,a){var o=[a[0],0];var i=1;while(i<a.length){o=add(o,multr(pow(x,i),a[i]));i++};return o}
+function multr(x,y){return [x[0]*y,x[1]*y]}
+function cRec(x){let r1=x[0]*x[0]+x[1]*x[1];return [x[0]/r1,-x[1]/r1]}
+function der(x,a){var o=[0,0];var i=1;while(i<a.length){o=add(o,multr(pow(x,i-1),a[i]*i));i++};return o}
+function divide(x,y){return mult(x,multr([y[0],-y[1]],1/(y[0]*y[0]+y[1]*y[1])))}
+function f(x,c){return add(add(x,c),multr(divide(poly(x,coef),der(x,coef)),-R))}
+
+var type=1 //0 for julia,1 for mandelbrot,2 for z0=c
+
+var maxiter=40;
+var escv=16
+var R=1
+var con=[1,0]
+var inv=0
+var cup=4;var cdown=-4;var cleft=-4;var cright=4
+function convergent(x){var b0;if(x>1/escv){b0=1}else{b0=0};return b0}
+function tr(x,xmin,xmax){return x*(xmax-xmin)/400+xmin}
+var colorR=[0,255,255,255];colorG=[0,255,255,0];colorB=[150,255,0,0]
+function intp(x,y,t){return x+t*(y-x)}
+function Intp(x,t){
+var cp=Math.floor(t);np=Math.ceil(t)
+return intp(x[cp],x[np],t-Math.floor(t))
+}
+var mp=maxiter-1
+function ir(x){return Math.floor(Intp(colorR,x*3/mp))}
+function ig(x){return Math.floor(Intp(colorG,x*3/mp))}
+function ib(x){return Math.floor(Intp(colorB,x*3/mp))}
+function conv(x){
+var cn=maxiter;var point;let pold=[0,0];var ita=0;var ci
+if(type==0){ci=con;point=Trp(x)}else if(type==1){ci=Trp(x);point=con}else{ci=Trp(x);point=Trp(x)}
+while(ita<maxiter){
+if(convergent(abs(cSubt(point,pold)))==0){cn=ita;break}
+pold=point
+point=f(point,ci)
+ita++
+}
+return cn
+}
+function trp(x){return [tr(x[0],cleft,cright),tr(x[1],cup,cdown)]}
+function Trp(x){var o;if(inv==0){o=trp(x)}else{o=cRec(trp(x))};return o}
+function draw(){
+for(i=0;i<=400;i++){
+for(j=0;j<=400;j++){
+let c1=conv([i,j])
+const Cr=ir(c1);const Cg=ig(c1);const Cb=ib(c1)
+if(c1==maxiter){
+ctx.fillStyle='rgba(0,0,0,1)'
+}else{
+ctx.fillStyle='rgba('+Cr+','+Cg+','+Cb+',1)'
+}
+ctx.fillRect(i,j,1,1)
+}
+}
+}
+draw()
+
+var ratio=2
+var cs=[0,0]
+ca.onclick = function (event) {
+var event = event || window.event
+cs=trp([event.offsetX,event.offsetY])
+zoom()
+draw()}
+function zoom(){cup=(cup-cs[1])/ratio+cs[1];cdown=(cdown-cs[1])/ratio+cs[1];cleft=(cleft-cs[0])/ratio+cs[0];cright=(cright-cs[0])/ratio+cs[0]}
+function zoomOut(){var cX=(cleft+cright)/2;var cY=(cup+cdown)/2;
+cup=intp(cY,cup,ratio);cdown=intp(cY,cdown,ratio);cleft=intp(cX,cleft,ratio);cright=intp(cX,cright,ratio)}
+
+
+</script>
+<br>
+<button onclick="zoomOut();draw()">zoom out</button><button onclick='cup=4;cdown=-4;cleft=-4;cright=4;draw()'>reset</button><br>
+Max iterations:<input type="text" id="maxiter" value="40"><br>
+Escape value:<input type="text" id="escv" value="16"><br>
+Starting point:<input type="text" id="cx" value="1">+<input type="text" id="cy" value="0">i<br>
+Polynomial:<input type="text" id="coef" value="-1,0,0,1">
+<br>Relation number:<input type='text' id='R' value='1'><br>
+Type:(0 for julia,1 for mandelbrot,2 for z_0=c)<input type="text" id="type" value="1"><br>
+0 for normal fractal,1 for inverted fractal:<input type="text" id="inv" value="0">
+<script>
+var maxiterE=document.getElementById('maxiter');var escvE=document.getElementById('escv');var RE=document.getElementById('R');var typeE=document.getElementById('type');
+var invE=document.getElementById('inv')
+var cxE=document.getElementById('cx');var cyE=document.getElementById('cy');
+var coefE=document.getElementById('coef')
+maxiterE.onchange=function(){maxiter=maxiterE.value;draw()}
+escvE.onchange=function(){escv=escvE.value;draw()}
+cxE.onchange=function(){con[0]=parseFloat(cxE.value);draw()}
+cyE.onchange=function(){con[1]=parseFloat(cyE.value);draw()}
+RE.onchange=function(){R=RE.value;draw()}
+invE.onchange=function(){inv=invE.value;draw()}
+coefE.onchange=function(){coef=coefE.value.split(',').map(Number);draw()}
+typeE.onchange=function(){type=typeE.value;draw()}
+
+</script><br>
+Note:the polynomial starts at z^0,eg.z^3-1 is -1,0,0,1
+</body>
+</html>
