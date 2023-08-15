@@ -5,6 +5,7 @@
 <script>
 var ca=document.getElementById("ca")
 var ctx=ca.getContext('2d')
+ctx.fillStyle='rgb(0,0,0)'
 function sqr(x){return [x[0]*x[0]-x[1]*x[1],2*x[0]*x[1]]} //complex number functions
 function cbr(x){let u=x[0];let v=x[1];return [u**3-3*u*v*v,3*u*u*v-v**3]}
 function mult(x,y){return [x[0]*y[0]-x[1]*y[1],x[0]*y[1]+x[1]*y[0]]}
@@ -31,44 +32,30 @@ var cy=0
 var con=[cx,cy]
 var inv=0
 var ex=2
-var cup=4;var cdown=-4;var cleft=-4;var cright=4
+var cu=2;var cd=-2;var cl=-2;var cr=2
 function convergent(x){var b0;if(x<escv){b0=1}else{b0=0};return b0}
 function tr(x,xmin,xmax){return x*(xmax-xmin)/400+xmin}
-var colorR=[0,255,255,255];colorG=[0,255,255,0];colorB=[150,255,0,0]
-function intp(x,y,t){return x+t*(y-x)}
-function Intp(x,t){
-var cp=Math.floor(t);np=Math.ceil(t)
-return intp(x[cp],x[np],t-Math.floor(t))
-}
-var mp=maxiter-1
-function ir(x){return Math.floor(Intp(colorR,x*3/mp))}
-function ig(x){return Math.floor(Intp(colorG,x*3/mp))}
-function ib(x){return Math.floor(Intp(colorB,x*3/mp))}
 function conv(x){
-var cn=maxiter;var point;let pold=[0,0];var ita=0;var ci
+var cn=true;var point;let pold=[0,0];var ita=0;var ci
 if(type==0){ci=con;point=Trp(x)}else if(type==1){ci=Trp(x);point=con}else{ci=Trp(x);point=Trp(x)}
-point=point.concat([0,0])
 while(ita<maxiter){
-if(convergent(abs(cSubt(point,pold)))==0){cn=ita;break}
-pold=[point[0],point[1]]
-point=f(point,ci).concat(pold)
+if(convergent(abs(cSubt(point,pold)))==0){cn=false;break}
+pold=point
+point=f(point,ci)
 ita++
 }
 return cn
 }
-function trp(x){return [tr(x[0],cleft,cright),tr(x[1],cup,cdown)]}
+function trp(x){return [tr(x[0],cl,cr),tr(x[1],cu,cd)]}
 function Trp(x){var o;if(inv==0){o=trp(x)}else{o=cRec(trp(x))};return o}
 function draw(){
+ctx.clearRect(1,1,400,400)
 for(i=0;i<=400;i++){
 for(j=0;j<=400;j++){
 let c1=conv([i,j])
-const Cr=ir(c1);const Cg=ig(c1);const Cb=ib(c1)
-if(c1==maxiter){
-ctx.fillStyle='rgba(0,0,0,1)'
-}else{
-ctx.fillStyle='rgba('+Cr+','+Cg+','+Cb+',1)'
-}
+if(c1){
 ctx.fillRect(i,j,1,1)
+}
 }
 }
 }
@@ -85,6 +72,7 @@ con=trp([event.offsetX,event.offsetY]);draw()
 <button onclick='cup=4;cdown=-4;cleft=-4;cright=4;draw()'>reset</button><br>
 Max iterations:<input type="text" id="maxiter" value="40"><br>
 Escape value:<input type="text" id="escv" value="16"><br>
+View range:<input type="text" id="cu" value="2">
 <br>
 Type:(0 for julia,1 for mandelbrot)<input type="text" id="type" value="0"><br>
 
@@ -94,11 +82,12 @@ var maxiterE=document.getElementById('maxiter');var escvE=document.getElementByI
 var typeE=document.getElementById('type');
 var modeE=document.getElementById('mode');
 var invE=document.getElementById('inv')
+var cuE=document.getElementById('cu')
 maxiterE.onchange=function(){maxiter=maxiterE.value;draw()}
 escvE.onchange=function(){escv=escvE.value;draw()}
 typeE.onchange=function(){type=typeE.value;draw()}
 invE.onchange=function(){inv=invE.value;draw()}
-
+cuE.onchange=function(){cu=parseFloat(cuE.value);cd=-parseFloat(cuE.value);cr=parseFloat(cuE.value);cl=-parseFloat(cuE.value);draw()}
 </script>
 <br>
 </body>
