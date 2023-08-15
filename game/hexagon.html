@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id='c' width='400' height='400'></canvas><br>
+<button onclick='reset()'>reset</button><br>
+Wall move speed:<input type='range' id='v' min='1' max='10' value='3' step='0.5' onchange='v=parseFloat(this.value)'>
+Wall generate interval:<input type='range' id='i' min='0.5' max='5' value='2' step='0.1' onchange='i=parseFloat(this.value)'><br>
+Wall width:<input type='range' min='0.1' id='w' max='1' value='0.4' step='0.1' onchange='w=parseFloat(this.value)'>
+Spin speed:<input type='range' id='sv' min='0' max='5' value='1' step='0.2' onchange='sv=parseFloat(this.value)'><br>
+Update interval:<input type='range' id='dt' min='0.01' max='0.1' value='0.05' step='0.01' onchange='dt=parseFloat(this.value)'>
+Color cycle speed:<input type='range' id='cyc' min='0.1' max='3' value='0.3' step='0.1' onchange='cyc=parseFloat(this.value)'>
+<script>
+function elem(x){return document.getElementById(x)}
+var ca=elem('c')
+var ctx=ca.getContext('2d')
+var g=0;var a=0;var i=2;var v=3;var sv=1
+var dt=0.05;var A=2/Math.sqrt(3);var t=0
+var group=[3,2];var dist=[5,10]
+var w=0.4
+var spin=0
+function sp(){return mod(v*a,i)<v*dt}
+function mod(x,y){return x-y*Math.floor(x/y)}
+function u1(){a=mod(a+dt,100)}
+function subt(arr){return arr.map(function(value){return value-dt*v})}
+function u2(){var od=[0];var og=[0];var x=0;var y=0;while(x<dist.length){if(dist[x]>v*dt){od[y]=dist[x]-v*dt;og[y]=group[x];y+=1};x++};dist=od;group=og}
+function cl(x,n){var y=[0];for(k=0;k<n;k++){y[k]=x};return y}
+var gA=1
+function j(x,y){if(x!=undefined){return x.concat(y)}else{return y}}
+function pick(x){return Math.floor(Math.random()*x)+1}
+var gr=[1,2,3,4,5,6]
+function ush(){gr=gr.sort(function(){return 0.5-Math.random()})}
+function sieve(x){var y=[];for(k=0;k<x;k++){y[k]=gr[k]};return y}
+function u5(){if(sp()){dist=j(dist,cl(10,gA));group=j(group,sieve(gA))}}
+var pi=Math.PI
+function us(){spin=mod(spin+sv*dt,2*pi)}
+function cos(x){return Math.cos(x)}
+function sin(x){return Math.sin(x)}
+function xp(G,D){return cos(pi*G/3+spin)*D}
+function yp(G,D){return sin(pi*G/3+spin)*D}
+function pG(){return mod(Math.floor(3*t/pi)-1,6)+1}
+function nG(){var x=[];var u=0;while(u<dist.length){if(dist[u]>=1&&dist[u]<=1+w){x=x.concat([group[u]])};u++};return x}
+function In(x,arr){return arr.filter(function(value){return value==x}).length>0}
+function ud(){if(In(pG(),nG())){g=1}}
+function xpL(G,D){return [xp(G,D),xp(G+1,D)]}
+function ypL(G,D){return [yp(G,D),yp(G+1,D)]}
+function xpW(G,D){var x=xpL(G,D);return x.concat(xpL(G,D-w).reverse())}
+function ypW(G,D){return ypL(G,D).concat(ypL(G,D-w).reverse())}
+function ur(){gA=pick(5)}
+function plot(x){
+var xy1=tr(x[0]);var xy2=tr(x[1]);var xy3=tr(x[2]);var xy4=tr(x[3]);
+ctx.beginPath();ctx.moveTo(xy1[0],xy1[1]);ctx.lineTo(xy2[0],xy2[1]);ctx.lineTo(xy3[0],xy3[1]);ctx.lineTo(xy4[0],xy4[1]);ctx.closePath();ctx.fill()
+}
+function wall(){var k=0;while(k<group.length){var G=group[k];var D=dist[k];x=xpW(G,D);y=ypW(G,D);plot([[x[0],y[0]],[x[1],y[1]],[x[2],y[2]],[x[3],y[3]]]);k++}}
+function p(x,y){return [y*cos(x+spin),y*sin(x+spin)]}
+function p1(x,y){return [xp(x,y),yp(x,y)]}
+function tr(x){return [25*(x[0]+8),25*(8-x[1])]}
+function plav(){return [p(t-0.1,1),p(t,1),p(t+0.1,1),p(t,1.2)]}
+function hsv(h1,s1,v1){var c1=v1*s1;var x1=c1*(1-Math.abs(mod(h1/60,2)-1));
+var u1=Math.floor(Math.min(359,h1)/60);var m1=v1-c1;var q=[[c1,x1,0],[x1,c1,0],[0,c1,x1],[0,x1,c1],[x1,0,c1],[c1,0,x1]][u1];
+return [255*(m1+q[0]),255*(m1+q[1]),255*(m1+q[2])]}
+function paint(h1,s1,v1){ctx.fillStyle='rgb('+hsv(h1,s1,v1)[0]+','+hsv(h1,s1,v1)[1]+','+hsv(h1,s1,v1)[2]+')'}
+var color=0
+function mt(x){ctx.moveTo(x[0],x[1])}
+function lt(x){ctx.lineTo(x[0],x[1])}
+function uh(){ctx.beginPath();mt(tr(p1(0,1)));var k=1;while(k<6){lt(tr(p1(k,1)));k++};ctx.closePath();ctx.fill()}
+function up(){paint(color,1,1);wall();plot(plav());paint(color,1,0.5);uh()}
+var cyc=0.3
+function uc(){color=mod(color+360*cyc*dt,360)}
+function game(){ctx.fillStyle='rgb(0,0,0)';ctx.fillRect(1,1,400,400);us();uc();up();if(g==0){u1();u2();ush();u5();ur();ud()}}
+ctx.fillStyle='rgb(0,0,0)';ctx.fillRect(1,1,400,400)
+ca.onmousemove=function(event){var event=event||window.event;t=event.offsetX/25-8}
+function reset(){g=0;group=[];dist=[]}
+setInterval(game,1000*dt)
+ve.onchange="function(){v=parseFloat(ve.value)}"
+</script>
+</body>
+</html>
