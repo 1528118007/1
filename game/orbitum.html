@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id='c' width='400' height='400' onclick='if(!g){J()}'></canvas><br>
+<button onclick='reset()'>reset</button>
+<script>
+function E(x){return document.getElementById(x)}
+var ca=E('c')
+var ctx=ca.getContext('2d')
+var rp=4;tp=0;dt=0.05;N=5;v=1;a=0.1
+var R=[5,5,5,5,5];T=[1,2,3,4,5];pi=Math.PI;Tr=[1,2,3,4,5]
+function p(r,t){return [Math.cos(t)*r,Math.sin(t)*r]}
+function pL(x){return x.filter(function(y){return y>0})}
+function add(x,y){return x.map(function(x1){return x1+y})}
+function u0(){a=mod(a+dt,100)}
+function mod(x,y){return x-y*Math.floor(x/y)}
+var Rn=0;Rt=[]
+function r1(){Rn=Math.floor(N*Math.random())+1}
+function rand(y){var x=[];for(i=0;i<y;i++){x[i]=Math.random()};return x}
+function r2(){Rt=mult(rand(Rn),2*pi)}
+function mult(x,y){return x.map(function(x1){return x1*y})}
+function sp(){return v*a%1<v*dt}
+function cl(x,y){var z=[];for(i=0;i<y;i++){z[i]=x};return z}
+var sv=1;Sv=2
+function u1(){if(sp()){R=R.concat(cl(5,Rn));T=T.concat(Rt);Tr=Tr.concat([5])}}
+function u2(){var x=[];y=[];j=0;for(i=0;i<R.length;i++){if(R[i]>0){x[j]=R[i]-v*dt;y[j]=T[i];j++}};R=x;T=y;Tr=add(pL(Tr),-v*dt)}
+function u3(){T=T.map(function(x){return mod(x+dt*sv,2*pi)})}
+function u4(){tp=mod(tp+dt*Sv,2*pi)}
+function u4r(){rp-=v*dt}
+function un(x){if(x!=undefined){return x}else{return Infinity}}
+function un1(x){if(x!=undefined){return x}else{return 0}}
+function el(){var x=[];j=0;for(i=0;i<R.length;i++){if(Math.abs(R[i]-rp)<dt){x[j]=p(R[i],T[i]);j++}};return x}
+function M(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1])}
+function nd(){var z=Infinity;for(i=0;i<el().length;i++){var y=D(el()[i],p(rp,tp));if(y<z){z=y}};return z}
+function D(x,y){return M([x[0]-y[0],x[1]-y[1]])}
+function ind(x,arr){var y;j=Infinity;for(i=0;i<arr.length;i++){var z=Math.abs(arr[i]-x);if(z<j){j=z;y=i};if(j==0){break}};return y}
+function j1(){rp=Tr[ind(rp,Tr)+1]}
+function J(){if(ind(rp,Tr)==Tr.length-1){rp+=1}else{j1()}}
+function max(x){var y=-Infinity;for(i=0;i<x.length;i++){if(x[i]>y){y=x[i]}};return y}
+var h=0.3;H=0.2
+function point(x,r){ctx.beginPath();ctx.arc(tr(x[0]),tr(x[1]),r*200/7,0,2*pi);ctx.fill()}
+function cir(x,r){ctx.beginPath();ctx.arc(tr(x[0]),tr(x[1]),Math.abs(r*200/7),0,2*pi);ctx.stroke()}
+var spin=0
+function u5(){spin=mod(spin+sv*dt,2*pi)}
+function A(x,y){return [x[0]+y[0],x[1]+y[1]]}
+function ed(x){return [A(x,p(H,spin)),A(x,p(H,spin+2*pi/3)),A(x,p(H,spin+4*pi/3))]}
+function tri(t){var x=trp(t[0]);y=trp(t[1]);z=trp(t[2]);ctx.beginPath();ctx.moveTo(x[0],x[1]);ctx.lineTo(y[0],y[1]);ctx.lineTo(z[0],z[1]);ctx.closePath();ctx.fill()}
+function setc(x,y,z){ctx.fillStyle='rgb('+x+','+y+','+z+')'}
+function over(){return nd()<h+H||rp<0||rp>max(Tr)}
+function sets(x,y,z){ctx.strokeStyle='rgb('+x+','+y+','+z+')'}
+function ep(){for(i=0;i<R.length;i++){tri(ed(p(R[i],T[i])))}}
+function tp1(){sets(255,255,255);for(i of Tr){cir([0,0],i)};sets(128,0,0);cir([0,0],max(Tr)+1)}
+var g=false
+function tr(x){return (x+7)*200/7}
+function trp(x){return [tr(x[0]),tr(x[1])]}
+function pp(){point(p(rp,tp),h)}
+function plot(){setc(0,0,0);ctx.fillRect(0,0,400,400);tp1();setc(255,255,255);pp();setc(255,0,0);ep()}
+function game(){if(!g){r1();r2();u0();u1();u2();u4r();g=over()};u3();u4();u5();plot()}
+function reset(){R=[];T=[];Tr=[1,2,3,4,5];rp=4;g=false;a=0.1}
+setInterval(game,1000*dt)
+</script>
+</body>
+</html>
