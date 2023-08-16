@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id='c' width='400' height='400'></canvas><br>
+Outside radius<input type='range' id='R' min='-10' max='10' value='3.2' step='0.1'>
+Inside radius<input type='range' id='r' min='-10' max='10' value='0.4' step='0.1'><br>
+Center size<input type='range' id='c' min='-10' max='10' value='1.8' step='0.1'>
+Trail amount<input type='range' id='N' min='1' max='30' value='16' step='1'><br>
+Trail length<input type='range' id='L' min='0.1' max='F(m())' value='2' step='0.1'>
+Scale<input type='range' id='S' min='0.2' max='5' value='2' step='0.1'><br>
+Speed<input type='range' id='V' min='0.1' max='3' value='0.5' step='0.1'>
+Line thickness<input type='range' id='T' min='1' max='10' value='2' step='1'><br>
+Color<input type='range' id='h' min='0' max='359' value='120' step='1'>
+Contrast<input type='range' id='co' min='0.1' max='1' value='0.5' step='0.05'><br>
+Steps:<input id='st' type='text' value='1000'><button onclick='shuffle()'>shuffle</button>
+<script>
+function E(x){return document.getElementById(x)}
+var ca=E('c')
+var ctx=ca.getContext('2d')
+function F(x){return Math.floor(x)}
+function sin(x){return Math.sin(x)}
+function cos(x){return Math.cos(x)}
+function A(x){return Math.abs(x)}
+function M(x,y){return x-y*F(x/y)}
+var R=3.2;r=0.4;c=1.8;N=16;L=2;S=2;V=0.5;h=120;co=1;st=1000;T=2;a=0
+function tr(x){return 10*(x*S+20)}
+function hsv(x1,x2,x3){var x=x2*x3;var y=x*(1-A(M(x1/60,2)-1));var z=[[x,y,0],[y,x,0],[0,x,y],[0,y,x],[y,0,x],[x,0,y]][F(x1/60)];return mult(add(z,x3-x),255)}
+function add(x,y){return [x[0]+y,x[1]+y,x[2]+y]}
+function mult(x,y){return [x[0]*y,x[1]*y,x[2]*y]}
+function sethsv(x,y,z){var x1=hsv(x,y,z);ctx.fillStyle='rgb('+x1[0]+','+x1[1]+','+x1[2]+')'}
+function d(){return R-r}
+function g(x){if(r==0){return x}else{return x/r}}
+function m(){return A(20*Math.PI*r/gcd(F(10*r),F(10*R)))}
+const gcd = (x, y) => !y ? x : gcd(y, x % y)
+function Fm(x,y){return F(x/y)*y}
+function f1(x1,x,y,z){return x+z*(x1+F(x1/y))}
+function f(x){return f1(x,a,L/(m()-L),(m()-L)/N)}
+function xp(t){return d()*S*cos(t)+g(c)*cos(t*g(d()))}
+function yp(t){return d()*S*sin(t)-g(c)*sin(t*g(d()))}
+function u(){return A(L*N/(m()-L))}
+function anim(){a=M(a+dt*V,m())}
+function point(t){ctx.fillRect(t[0],t[1],T,T)}
+function Tr(x){return [tr(x[0]),tr(x[1])]}
+function plot(){for(i=0;i<u();i+=u()/st){point(Tr([xp(f(i*u())),yp(f(i*u()))]))}}
+function draw(){sethsv(h,1,1-co);ctx.fillRect(0,0,400,400);sethsv(h,1,1);anim();plot()}
+var dt=0.05
+setInterval(draw,1000*dt)
+function k(x,y,t){return Fm(x+(y-x)*Math.random(),t)}
+E('R').onchange=function(){R=E('R').value};E('r').onchange=function(){r=E('r').value};E('N').onchange=function(){N=E('N').value};E('c').onchange=function(){c=E('c').value};E('L').onchange=function(){L=E('L').value};E('S').onchange=function(){S=E('S').value};E('V').onchange=function(){V=E('V').value};E('T').onchange=function(){T=E('T').value};E('co').onchange=function(){co=E('co').value};E('h').onchange=function(){h=E('h').value};E('st').onchange=function(){st=E('st').value};
+function shuffle(){E('R').value=k(-5,5,0.1);E('r').value=k(-5,5,0.1);E('c').value=k(-5,5,0.1);E('N').value=k(1,30,1);E('L').value=k(0.1,F(m()),0.1);E('V').value=k(0.1,3,0.1);E('h').value=k(1,359,1);E('co').value=k(0.5,1,0.05);setvalue()}
+function setvalue(){r=E('r').value;N=E('N').value;c=E('c').value;R=E('R').value;L=E('L').value;S=E('S').value;V=E('V').value;T=E('T').value;co=E('co').value;h=E('h').value}
+</script>
+</body>
+</html>
