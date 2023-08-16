@@ -8,12 +8,13 @@ Wall generate interval:<input type='range' id='i' min='0.5' max='5' value='2' st
 Wall width:<input type='range' min='0.1' id='w' max='1' value='0.4' step='0.1' onchange='w=parseFloat(this.value)'>
 Spin speed:<input type='range' id='sv' min='0' max='5' value='1' step='0.2' onchange='sv=parseFloat(this.value)'><br>
 Update interval:<input type='range' id='dt' min='0.01' max='0.1' value='0.05' step='0.01' onchange='dt=parseFloat(this.value)'>
-Color cycle speed:<input type='range' id='cyc' min='0.1' max='3' value='0.3' step='0.1' onchange='cyc=parseFloat(this.value)'>
+Color cycle speed:<input type='range' id='cyc' min='0.1' max='3' value='0.3' step='0.1' onchange='cyc=parseFloat(this.value)'><br>
+Move sensitivity:<input type='range' id='se' min='3' max='10' value='5' step='1' onchange='se=parseFloat(this.value)'>
 <script>
 function elem(x){return document.getElementById(x)}
 var ca=elem('c')
 var ctx=ca.getContext('2d')
-var g=0;var a=0;var i=2;var v=3;var sv=1
+var g=0;var a=0;var i=2;var v=3;var sv=1;var se=3
 var dt=0.05;var A=2/Math.sqrt(3);var t=0
 var group=[3,2];var dist=[5,10]
 var w=0.4
@@ -66,12 +67,13 @@ function uh(){ctx.beginPath();mt(tr(p1(0,1)));var k=1;while(k<6){lt(tr(p1(k,1)))
 function up(){paint(color,1,1);wall();plot(plav());paint(color,1,0.5);uh()}
 var cyc=0.3
 function uc(){color=mod(color+360*cyc*dt,360)}
-function game(){ctx.fillStyle='rgb(0,0,0)';ctx.fillRect(1,1,400,400);us();uc();up();if(g==0){u1();u2();ush();u5();ur();ud()}}
+function game(){ctx.fillStyle='rgb(0,0,0)';ctx.fillRect(1,1,400,400);us();uc();up();if(g==0){u1();u2();ush();u5();ur();ud();t=mod(t+dt*dir*se,2*pi)}}
 ctx.fillStyle='rgb(0,0,0)';ctx.fillRect(1,1,400,400)
-ca.onmousemove=function(event){var event=event||window.event;t=event.offsetX/25-8}
 function reset(){g=0;group=[];dist=[]}
 setInterval(game,1000*dt)
-ve.onchange="function(){v=parseFloat(ve.value)}"
+var dir=0
+document.onkeydown=function(event){var event=event||window.event;x=event.keyCode;if(x==37){dir=1}else if(x==39){dir=-1}}
+document.onkeyup=function(event){dir=0}
 </script>
 </body>
 </html>
