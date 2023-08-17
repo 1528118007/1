@@ -27,12 +27,12 @@ function u2(){var x=[];y=[];j=0;for(i=0;i<R.length;i++){if(R[i]>0){x[j]=R[i]-v*d
 function u3(){T=T.map(function(x){return mod(x+dt*sv,2*pi)})}
 function u4(){tp=mod(tp+dt*Sv,2*pi)}
 function u4r(){rp-=v*dt}
-function un(x){if(x!=undefined){return x}else{return Infinity}}
-function un1(x){if(x!=undefined){return x}else{return 0}}
 function el(){var x=[];j=0;for(i=0;i<R.length;i++){if(Math.abs(R[i]-rp)<dt){x[j]=p(R[i],T[i]);j++}};return x}
 function M(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1])}
-function nd(){var z=Infinity;for(i=0;i<el().length;i++){var y=D(el()[i],p(rp,tp));if(y<z){z=y}};return z}
-function D(x,y){return M([x[0]-y[0],x[1]-y[1]])}
+function un0(x){if(x!=undefined){return x}else{return [100,0]}}
+function un1(x){if(x!=undefined){return x}else{return [-100,0]}}
+var nd=function(){var z=Infinity;i1=0;while(i1<el().length){var y=D(el()[i1],p(rp,tp));if(y<z){z=y};i1++};return z}
+function D(x1,y1){return M([un0(x1)[0]-un1(y1)[0],un0(x1)[1]-un1(y1)[1]])}
 function ind(x,arr){var y;j=Infinity;for(i=0;i<arr.length;i++){var z=Math.abs(arr[i]-x);if(z<j){j=z;y=i};if(j==0){break}};return y}
 function j1(){rp=Tr[ind(rp,Tr)+1]}
 function J(){if(ind(rp,Tr)==Tr.length-1){rp+=1}else{j1()}}
@@ -57,7 +57,7 @@ function pp(){point(p(rp,tp),h)}
 function plot(){setc(0,0,0);ctx.fillRect(0,0,400,400);tp1();setc(255,255,255);pp();setc(255,0,0);ep()}
 function game(){if(!g){r1();r2();u0();u1();u2();u4r();g=over()};u3();u4();u5();plot()}
 function reset(){R=[];T=[];Tr=[1,2,3,4,5];rp=4;g=false;a=0.1}
-setInterval(game,1000*dt)
+var w1=setInterval(game,1000*dt)
 </script>
 </body>
 </html>
