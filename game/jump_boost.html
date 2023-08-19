@@ -2,7 +2,7 @@
 <html>
 <body>
 <canvas id='c' width='400' height='400'></canvas>
-
+<br><button onclick='reset()'>reset</button>
 
 <script>
 function elem(x){return document.getElementById(x)}
@@ -30,7 +30,7 @@ var M=(x)=>sqrt(x[0]*x[0]+x[1]*x[1])
 var D=(x,y)=>M([x[0]-y[0],x[1]-y[1]])
 function tr(x){return (x+B)*200/B}
 function tr1(x){return (-x+B)*200/B}
-var Tr=(x)=>{var x1=[x[0],x[1]-ca];return [tr(T(x)[0]),tr1(T(x)[1])]}
+var Tr=(x)=>{var x1=[x[0],x[1]];return [tr(T(x1)[0]),tr1(T(x1)[1])]}
 function u2(){ca+=dt*V()}
 function gp(x,y){var z=[];for(i=0;i<x.length;i++){z[i]=[x[i],y[i]]};return z}
 function cl(x,y){var z=[];for(i=0;i<y;i++){z[i]=x};return z}
@@ -91,7 +91,7 @@ var E=Math.E //transformation preparation
 var sgn=(x)=>!x?0:(x>0?1:-1)
 var sh=(x)=>(E**x-E**(-x))/2
 var ch=(x)=>(E**x+E**(-x))/2
-var g1=(x)=>[x[0]*x[0]-x[1]*x[1],2*x[0]*x[1]]
+var g1=(x)=>[(x[0]*x[0]-x[1]*x[1])/w,2*x[0]*x[1]/w]
 var g2=(x)=>[sqrt((M(x)+x[0])/2),sgn(x[1])*sqrt((M(x)-x[0])/2)]
 var g3=(x)=>[sin(x[0])*ch(x[1]),cos(x[0])*sh(x[1])]
 var g4=(x)=>{var y=(x[0]-1)*(x[0]-1)+x[1]*x[1];return [-2*x[1]/y,(x[0]*x[0]+x[1]*x[1]-1)/y]}
@@ -99,7 +99,7 @@ var g5=(x)=>mult([cos(x[1]),sin(x[1])],E**x[0])
 var g6=(x)=>[ln(M(x)),Math.atan2(x[1],x[0])]
 var g7=(x)=>mult([x[0],-x[1]],w/(x[0]*x[0]+x[1]*x[1]))
 var g8=(x)=>g7(g3(x))
-var I6=1
+var I6=8
 function Tt(x){var y;switch(I6){
 case 1:y=g1(x);break
 case 2:y=g2(x);break
@@ -125,7 +125,7 @@ function us(){us1();us2();us3();us4();us5();us6();usw()}
 function game(){if(g==0){u1();u3();ua();J();up()};u2();ud();us();plot()}
 
 function rect(x){ctx.fillRect(x[0],x[1],1,1)}
-var st=400;St=100;Ps=3
+var st=200;St=50;Ps=3
 var p1=(x,t)=>[x[0]+lw*(t-0.5),x[1]]
 function p2(x){for(t=0;t<1;t+=1/st){rect(Tr(p1(x,t)))}}
 function Px(){Pw.forEach(p2)}
@@ -143,6 +143,7 @@ setrgb(128,128,128);Point(P4)
 setrgb(0,255,0);Point(P5)
 setrgb(255,0,255);Point(P6)
 }
+function reset(){g=0;Pw=[[0,B-ps]];xp=0;yp=B;P1=[];P2=[];P3=[];P4=[];P5=[];P6=[];t1=T1;t2=T2;t3=T3;t4=T4;t5=T5;t6=2+T6;ca=0}
 setInterval(game,1000*dt)
 document.onkeydown=function(event){var event=event||window.event;x=event.keyCode;
 if(x==37){xd=-1};if(x==39){xd=1};if(x==38){yd=1}}
