@@ -1,0 +1,90 @@
+<html>
+<body>
+<canvas id='c' width='400' height='400'></canvas><br>
+Max iterations:<input type='text' id='iter' value='40'>
+Escape value:<input type='text' id='E' value='16'><br>
+Constant:<input type='text' id='con' value='0,0,0,0'><br>
+X Parameter:<input type='text' id='v1' value='1,0,0,0'>
+Y Parameter:<input type='text' id='v2' value='0,1,0,0'><br>
+<button onclick='zoomOut()'>zoom out</button><button onclick='plot()'>draw pattern</button>
+Select fractal:<select id='frac'>
+<option value='1' selected>julibrot</option><option value='2'>quarternion mandelbrot</option>
+<option value='3'>mandelbulb</option><option value='4'>tetrabrot</option>
+<option value='5'>bristorbrot</option><option value='6'>tetrabrot variation 1</option>
+<option value='7'>tetrabrot variation 2</option><option value='8'>tetrabrot variation 3</option>
+<option value='9'>tetrabrot variation 4</option><option value='10'>quarternion nova</option>
+<option value='11'>4d nova</option>
+</select>
+<br>
+Mode:<input type='text' id='mode' value='0'>0 for divergent 1 for convergent
+Type:<input type='text' id='type' value='0'>0 for julia 1 for mandel
+<script>
+var ca=elem('c')
+var ctx=ca.getContext('2d')
+var add=(x,y)=>[x[0]+y[0],x[1]+y[1],x[2]+y[2],x[3]+y[3]]
+var subt=(x,y)=>[x[0]-y[0],x[1]-y[1],x[2]-y[2],x[3]-y[3]]
+var mult=(x,y)=>[x[0]*y,x[1]*y,x[2]*y,x[3]*y]
+var Mg=(x,y,z)=>[x[0]*y[0]*z[0]+x[1]*y[1]*z[1]+x[2]*y[2]*z[2]+x[3]*y[3]*z[3],x[0]*y[1]*z[4]+x[1]*y[0]*z[5]+x[2]*y[3]*z[6]+x[3]*y[2]*z[7],x[0]*y[2]*z[8]+x[2]*y[0]*z[9]+x[3]*y[1]*z[10]+x[1]*y[3]*z[11],x[0]*y[3]*z[12]+x[3]*y[0]*z[13]+x[1]*y[2]*z[14]+x[2]*y[1]*z[15]]
+var M=(x,y)=>Mg(x,y,[1,-1,-1,-1,1,1,1,-1,1,1,1,-1,1,1,1,-1])//quarternion mult
+var Mb=(x,y)=>Mg(x,y,[1,-1,-1,1,1,1,-1,-1,1,1,-1,-1,1,1,1,1])//bicomplex mult
+var Mo=(x,y)=>Mg(x,y,[0,0,0,0,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1])//outer prod
+var Me=(x,y)=>Mg(x,y,[0,0,0,0,0,0,1,-1,0,0,1,-1,0,0,1,-1])//even prod
+var d=(x,y)=>x[0]*y[0]+x[1]*y[1]+x[2]*y[2]+x[3]*y[3]
+var D=(x)=>d(x,x)
+var r=(x)=>mult([x[0],-x[1],-x[2],-x[3]],1/D(x))
+function elem(x){return document.getElementById(x)}
+var C=()=>elem('con').value.split(',').map(Number)
+var cu=4;cd=-4;cl=-4;cr=4
+var tr=(x,x1,x2)=>x*(x2-x1)/400+x1
+var E=()=>parseInt(elem('E').value);iter=()=>parseInt(elem('iter').value);
+mp=()=>iter()-1
+var type=()=>parseInt(elem('type').value);mode=()=>parseInt(elem('mode').value)
+var conv=(x)=>!mode()?x<E()*E():x>1/(E()*E())
+var cR=[0,255,255,255];cG=[0,255,255,0];cB=[150,255,0,0]
+var intp=(x,y,t)=>x+(y-x)*t
+var Intp=(x,t)=>intp(x[Math.floor(t)],x[Math.ceil(t)],t%1)
+var Ir=(x)=>Intp(cR,x*3/mp())
+var Ig=(x)=>Intp(cG,x*3/mp())
+var Ib=(x)=>Intp(cB,x*3/mp())
+//functions
+var fJ=(x,c)=>add(c,[x[0]*x[0]-x[1]*x[1]+x[2],2*x[0]*x[1]+x[3],x[2],x[3]])
+var fM=(x,c)=>add(M(x,x),c)
+var fm=(x,c)=>{var y=x[1]*x[1]+x[2]*x[2];return add(c,[0,(x[1]*x[1]-x[2]*x[2])*(1-x[3]*x[3]/y),2*x[1]*x[2]*(1-x[3]*x[3]/y),-2*x[3]*Math.sqrt(y)])}
+var fT=(x,c)=>add(c,Mb(x,x))
+var fB=(x,c)=>add(c,[0,x[1]*x[1]-x[2]*x[2]-x[3]*x[3],(2*x[1]-x[3])*x[2],(2*x[1]+x[2])*x[3]])
+var fT1=(x,c)=>add(c,Mg(x,x,[1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1]))
+var fT2=(x,c)=>add(c,Mg(x,x,[1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1,-1]))
+var fT3=(x,c)=>add(c,Mg(x,x,[1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1]))
+var fT4=(x,c)=>add(c,Mg(x,x,[1,-1,-1,-1,1,1,1,1,1,1,-1,-1,1,1,1,1]))
+var fN=(x,c)=>add(c,add(mult(x,2/3),mult(r(M(x,x)),1/3)))
+var fn=(z,c)=>{var x=z[0];y=z[1];x2=x*x;y2=y*y;t=(x2*y2)*(x2*y2);return add(c,[2*x/3+(x2-y2)/(3*t)+z[2],2*y/3-2*x*y/(3*t)+z[3],z[2],z[3]])}
+var id=()=>parseInt(elem('frac').value)
+function f(x,c){var o;switch(id()){case 1:o=fJ(x,c);break
+case 2:o=fM(x,c);break
+case 3:o=fm(x,c);break
+case 4:o=fT(x,c);break
+case 5:o=fB(x,c);break
+case 6:o=fT1(x,c);break
+case 7:o=fT2(x,c);break
+case 8:o=fT3(x,c);break
+case 9:o=fT4(x,c);break
+case 10:o=fN(x,c);break
+case 11:o=fn(x,c);break};return o}
+function Conv(x,y){var cn=iter();z=[0,0,0,0];p1=getpoint(tr(x,cl,cr),tr(y,cu,cd));var con;var p
+if(!type()){p=p1;con=C()}else{p=C();con=p1};var ita=0;
+while(ita<iter()){if(!conv(D(subt(z,p)))){cn=ita;break};z=p;p=f(p,con);ita++};return cn}
+var v1=()=>elem('v1').value.split(',').map(Number)
+var v2=()=>elem('v2').value.split(',').map(Number)
+var getpoint=(x,y)=>add(mult(v1(),x),mult(v2(),y))
+var R=2
+function zoom(x,y){cl=(cl-x)/R+x;cr=(cr-x)/R+x;cu=(cu-y)/R+y;cd=(cd-y)/R+y}
+function zoomOut(){var x=(cl+cr)/2;y=(cu+cd)/2;cl=intp(x,cl,R);cr=intp(x,cr,R);cu=intp(y,cu,R);cd=intp(y,cd,R);plot()}
+function plot(){for(i=0;i<400;i++){for(j=0;j<400;j++){
+var x=Conv(i,j);
+if(x==iter()){ctx.fillStyle='rgb(0,0,0)'}else{ctx.fillStyle='rgb('+Ir(x)+','+Ig(x)+','+Ib(x)+')'}
+ctx.fillRect(i,j,1,1)}}}
+ca.onclick=(event)=>{var event=event||window.event;zoom(event.offsetX,event.offsetY);plot()}
+plot()
+</script>
+</body>
+</html>
