@@ -1,22 +1,23 @@
 <html>
 <body>
 <canvas id='c' width='400' height='400'></canvas><br>
-Max iterations:<input type='text' id='iter' value='40'>
-Escape value:<input type='text' id='E' value='16'><br>
+Max iterations:<input type='text' id='iter' value='20'>
+Escape value:<input type='text' id='E' value='4'><br>
 Constant:<input type='text' id='con' value='0,0,0,0'><br>
-X Parameter:<input type='text' id='v1' value='1,0,0,0'>
-Y Parameter:<input type='text' id='v2' value='0,1,0,0'><br>
+X Parameter:<input type='text' id='v1' value='0,0,1,0'>
+Y Parameter:<input type='text' id='v2' value='0,0,0,1'>
+Adjustion Parameter:<input type='text' id='v3' value='1,0,0,0'><br>
 <button onclick='zoomOut()'>zoom out</button><button onclick='plot()'>draw pattern</button>
 Select fractal:<select id='frac'>
-<option value='1' selected>julibrot</option><option value='2'>quarternion mandelbrot</option>
+<option value='1'>julibrot</option><option value='2'>quarternion mandelbrot</option>
 <option value='3'>mandelbulb</option><option value='4'>tetrabrot</option>
 <option value='5'>bristorbrot</option><option value='6'>tetrabrot variation 1</option>
 <option value='7'>tetrabrot variation 2</option><option value='8'>tetrabrot variation 3</option>
 <option value='9'>tetrabrot variation 4</option><option value='10'>quarternion nova</option>
-<option value='11'>4d nova</option>
+<option value='11' selected>4d nova</option>
 </select>
 <br>
-Mode:<input type='text' id='mode' value='0'>0 for divergent 1 for convergent
+Mode:<input type='text' id='mode' value='1'>0 for divergent 1 for convergent<br>
 Type:<input type='text' id='type' value='0'>0 for julia 1 for mandel
 <script>
 var ca=elem('c')
@@ -57,7 +58,7 @@ var fT2=(x,c)=>add(c,Mg(x,x,[1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1,-1]))
 var fT3=(x,c)=>add(c,Mg(x,x,[1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1]))
 var fT4=(x,c)=>add(c,Mg(x,x,[1,-1,-1,-1,1,1,1,1,1,1,-1,-1,1,1,1,1]))
 var fN=(x,c)=>add(c,add(mult(x,2/3),mult(r(M(x,x)),1/3)))
-var fn=(z,c)=>{var x=z[0];y=z[1];x2=x*x;y2=y*y;t=(x2*y2)*(x2*y2);return add(c,[2*x/3+(x2-y2)/(3*t)+z[2],2*y/3-2*x*y/(3*t)+z[3],z[2],z[3]])}
+var fn=(z,c)=>{var x=z[0];y=z[1];x2=x*x;y2=y*y;t=(x2+y2)*(x2+y2);return add(c,[2*x/3+(x2-y2)/(3*t)+z[2],2*y/3-2*x*y/(3*t)+z[3],z[2],z[3]])}
 var id=()=>parseInt(elem('frac').value)
 function f(x,c){var o;switch(id()){case 1:o=fJ(x,c);break
 case 2:o=fM(x,c);break
@@ -75,7 +76,8 @@ if(!type()){p=p1;con=C()}else{p=C();con=p1};var ita=0;
 while(ita<iter()){if(!conv(D(subt(z,p)))){cn=ita;break};z=p;p=f(p,con);ita++};return cn}
 var v1=()=>elem('v1').value.split(',').map(Number)
 var v2=()=>elem('v2').value.split(',').map(Number)
-var getpoint=(x,y)=>add(mult(v1(),x),mult(v2(),y))
+var v3=()=>elem('v3').value.split(',').map(Number)
+var getpoint=(x,y)=>add(mult(v1(),x),add(mult(v2(),y),v3()))
 var R=2
 function zoom(x,y){cl=(cl-x)/R+x;cr=(cr-x)/R+x;cu=(cu-y)/R+y;cd=(cd-y)/R+y}
 function zoomOut(){var x=(cl+cr)/2;y=(cu+cd)/2;cl=intp(x,cl,R);cr=intp(x,cr,R);cu=intp(y,cu,R);cd=intp(y,cd,R);plot()}
