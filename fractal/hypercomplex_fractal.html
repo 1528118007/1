@@ -85,7 +85,7 @@ function plot(){for(i=0;i<400;i++){for(j=0;j<400;j++){
 var x=Conv(i,j);
 if(x==iter()){ctx.fillStyle='rgb(0,0,0)'}else{ctx.fillStyle='rgb('+Ir(x)+','+Ig(x)+','+Ib(x)+')'}
 ctx.fillRect(i,j,1,1)}}}
-ca.onclick=(event)=>{var event=event||window.event;zoom(event.offsetX,event.offsetY);plot()}
+ca.onclick=(event)=>{var event=event||window.event;zoom(tr(event.offsetX),tr(event.offsetY);plot()}
 plot()
 </script>
 </body>
