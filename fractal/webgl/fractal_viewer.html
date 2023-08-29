@@ -3,7 +3,7 @@
 <body>
 
 <canvas id='c'></canvas><br>
-Type:(0 for julia,1 for mandelbrot)<input type="text" id="type" value="1"><br>
+Type:(0 for julia,1 for mandelbrot)<input type="text" id="type" value="0"><br>
 Mode:<select id="mode" onchange='getSelectValue(this.value)'><option value='0'>divergent</option><option value='1'>convergent</option></select>
 Select fractal:<select id="frac">
 <option value='0'>mandelbrot set</option>
@@ -28,7 +28,7 @@ precision highp float;
 #endif
 uniform vec2 ce;uniform vec2 s;uniform float mode;uniform float type;
 uniform float id;uniform float inverted;
-float es=16.0;
+float es=64.0;
 //functions
 vec2 mult(vec2 x,vec2 y){return vec2(x.x*y.x-x.y*y.y,x.x*y.y+x.y*y.x);}
 vec2 sqr(vec2 x){return mult(x,x);}
@@ -42,6 +42,11 @@ vec2 cbr(vec2 x){
 return vec2(x.x*x.x*x.x-3.0*x.x*x.y*x.y,
 3.0*x.x*x.x*x.y-x.y*x.y*x.y);
 }
+float cosh(float x){return (exp(x)+exp(-x))/2.0;}
+float sinh(float x){return (exp(x)-exp(-x))/2.0;}
+vec2 Sin(vec2 x){return vec2(sin(x.x)*cosh(x.y),cos(x.x)*sinh(x.y));}
+vec2 Cos(vec2 x){return vec2(cos(x.x)*cosh(x.y),-sin(x.x)*sinh(x.y));}
+vec2 Exp(vec2 x){return exp(x.x)*vec2(cos(x.y),sin(x.y));}
 
 bool isConv(vec2 x,vec2 x_pre){
 float dist=M(x-x_pre);
@@ -88,7 +93,8 @@ z=z1;
 break;
 }
 }
-I/=100.0;gl_FragColor=vec4(I,I,I,1);}
+I=sqrt(I);
+I/=10.0;gl_FragColor=vec4(I,I,I,1);}
 </script>
 
 
