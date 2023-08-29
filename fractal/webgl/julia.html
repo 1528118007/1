@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id='c'></canvas>
+
+<script id='v' type='x-shader/x-vertex'>
+attribute vec4 a;
+void main(){gl_Position=vec4(a);gl_PointSize=1.0;}
+</script>
+
+<script id='f' type='x-shader/x-fragment'>
+#ifdef GL_ES
+precision highp float;
+#endif
+uniform vec2 c;uniform vec2 s;
+void main(){
+float r=min(c.x,c.y)*0.8;
+float cx=(s.x-c.x)/r;float cy=(s.y-c.y)/r;
+vec4 f=gl_FragCoord;
+float zx=(f.x-c.x)/r;float zy=(f.y-c.y)/r;
+float I=0.0;
+for(int i=0;i<100;i++){
+if((zx*zx+zy*zy)<4.0){
+I++;float zX=zx*zx-zy*zy+cx;float zY=zx*zy*2.0+cy;
+zx=zX;zy=zY;
+}else{
+break;
+}
+}
+I/=100.0;gl_FragColor=vec4(I,I,I,1);}
+</script>
+
+
+<script>
+var E=(x)=>document.getElementById(x)
+function init(gl,v,f){
+var x=gl.createProgram()
+var V=gl.createShader(gl.VERTEX_SHADER)
+var F=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(V,v);gl.shaderSource(F,f)
+gl.compileShader(V);gl.compileShader(F)
+gl.attachShader(x,V);gl.attachShader(x,F)
+gl.linkProgram(x)
+gl.useProgram(x)
+gl.program=x;return x
+}
+var vtc=new Float32Array([-1,1,1,1,1,-1,-1,1,1,-1,-1,-1])//vertices
+var ca=E('c');gl=ca.getContext('webgl')
+var vs=E('v').innerText;fs=E('f').innerText
+var p=init(gl,vs,fs)
+var w=window.innerWidth;h=window.innerHeight
+ca.width=w;ca.height=h
+var b=gl.createBuffer()
+var ab=gl.ARRAY_BUFFER
+gl.bindBuffer(ab,b);gl.bufferData(ab,vtc,gl.STATIC_DRAW)
+var a=gl.getAttribLocation(p,'a')
+gl.enableVertexAttribArray(a)
+gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
+var c=gl.getUniformLocation(p,'c');gl.uniform2fv(c,[w/2,h/2])//center
+var s=gl.getUniformLocation(p,'s');gl.uniform2fv(s,[w/2,h/2])
+var seed={x:w/2,y:h/2}
+ca.onmousemove=(event)=>{var event=event||window.event;seed.x=event.offsetX;seed.y=event.offsetY}
+function R(){
+gl.viewport(0,0,w,h)
+gl.uniform2f(s,seed.x,seed.y)
+gl.drawArrays(gl.TRIANGLES,0,6)
+window.requestAnimationFrame(R)
+}
+R()//render
+</script>
+
+</body>
+</html>
