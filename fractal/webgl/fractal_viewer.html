@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id='c'></canvas><br>
+Type:(0 for julia,1 for mandelbrot)<input type="text" id="type" value="1"><br>
+Mode:<select id="mode" onchange='getSelectValue(this.value)'><option value='0'>divergent</option><option value='1'>convergent</option></select>
+Select fractal:<select id="frac">
+<option value='0'>mandelbrot set</option>
+<option value='1'>nova fractal</option>
+<option value='2'>burning ship fractal</option>
+<option value='3'>lambda fractal</option>
+<option value='4'>magnet fractal 1</option>
+<option value='5'>magnet fractal 2</option>
+<option value='6'>phoenix fractal</option>
+<option value='7'>buffalo fractal</option>
+</select><br>
+0 for normal fractal,1 for inverted fractal:<input type="text" id="inv" value="0">
+
+<script id='v' type='x-shader/x-vertex'>
+attribute vec4 a;
+void main(){gl_Position=vec4(a);gl_PointSize=1.0;}
+</script>
+
+<script id='f' type='x-shader/x-fragment'>
+#ifdef GL_ES
+precision highp float;
+#endif
+uniform vec2 ce;uniform vec2 s;uniform float mode;uniform float type;
+uniform float id;uniform float inverted;
+float es=16.0;
+//functions
+vec2 mult(vec2 x,vec2 y){return vec2(x.x*y.x-x.y*y.y,x.x*y.y+x.y*y.x);}
+vec2 sqr(vec2 x){return mult(x,x);}
+float M(vec2 x){return sqrt(x.x*x.x+x.y*x.y);}
+vec2 rec(vec2 x){
+float x1=x.x*x.x+x.y*x.y;
+return vec2(x.x/x1,-x.y/x1);
+}
+vec2 div(vec2 x,vec2 y){return mult(x,rec(y));}
+vec2 cbr(vec2 x){
+return vec2(x.x*x.x*x.x-3.0*x.x*x.y*x.y,
+3.0*x.x*x.x*x.y-x.y*x.y*x.y);
+}
+
+bool isConv(vec2 x,vec2 x_pre){
+float dist=M(x-x_pre);
+return (dist<es&&mode==0.0)||(dist>1.0/es&&mode==1.0);
+}
+vec2 zold=vec2(0,0);
+//built-in fractals
+vec2 fJ(vec2 x,vec2 c){return sqr(x)+c;}
+vec2 fN(vec2 x,vec2 c){return 2.0*x/3.0+rec(sqr(x))/3.0+c;}
+vec2 fBs(vec2 x,vec2 c){return vec2(x.x*x.x-x.y*x.y+c.x,abs(x.x*x.y)*2.0+c.y);}
+vec2 fL(vec2 x,vec2 c){return mult(c,x-sqr(x));}
+vec2 fM1(vec2 x,vec2 c){return sqr(div(sqr(x)+c-vec2(1,0),2.0*x+c-vec2(2,0)));}
+vec2 fM2(vec2 x,vec2 c){return sqr(vec2(1,0)+div(cbr(vec2(1,0)),sqr(c)+3.0*mult(c-vec2(1,0),x-vec2(1,0))));}
+vec2 fP(vec2 x,vec2 c){return sqr(x)+0.5*zold+c;}
+vec2 fBf(vec2 x,vec2 c){vec2 x1=vec2(abs(x.x),abs(x.y));return sqr(x1)-x1+c;}
+//main function
+vec2 f(vec2 x,vec2 c){vec2 y;
+if(id==0.0){y=fJ(x,c);}
+else if(id==1.0){y=fN(x,c);}
+else if(id==2.0){y=fBs(x,c);}
+else if(id==3.0){y=fL(x,c);}
+else if(id==4.0){y=fM1(x,c);}
+else if(id==5.0){y=fM2(x,c);}
+else if(id==6.0){y=fP(x,c);}
+else if(id==7.0){y=fBf(x,c);}
+else{y=x+c;}
+return y;}
+
+void main(){
+float r=min(ce.x,ce.y)*0.5;
+
+vec2 fr=vec2(gl_FragCoord);
+vec2 cpre=(s-ce)/r;vec2 zpre=(fr-ce)/r;
+vec2 z;vec2 C;
+if(inverted==1.0){zpre=rec(zpre);}
+if(type==0.0){z=zpre;C=cpre;}else if(type==1.0){z=cpre;C=zpre;}else{z=zpre;C=zpre;}
+float I=0.0;
+for(int i=0;i<100;i++){
+if(isConv(z,zold)){
+I++;vec2 z1=f(z,C);
+zold=z;
+z=z1;
+}else{
+break;
+}
+}
+I/=100.0;gl_FragColor=vec4(I,I,I,1);}
+</script>
+
+
+<script>
+var E=(x)=>document.getElementById(x)
+function init(gl,v,f){
+var x=gl.createProgram()
+var V=gl.createShader(gl.VERTEX_SHADER)
+var F=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(V,v);gl.shaderSource(F,f)
+gl.compileShader(V);gl.compileShader(F)
+gl.attachShader(x,V);gl.attachShader(x,F)
+gl.linkProgram(x)
+gl.useProgram(x)
+gl.program=x;return x
+}
+var vtc=new Float32Array([-1,1,1,1,1,-1,-1,1,1,-1,-1,-1])//vertices
+var ca=E('c');gl=ca.getContext('webgl')
+var vs=E('v').innerText;fs=E('f').innerText
+var p=init(gl,vs,fs)
+var Mode=0;Type=0
+//mode 0 for divergent,1 for convergent
+//type 0 for julia,1 for mandelbrot
+
+//nothing here lmao
+
+var w=window.innerWidth;h=window.innerHeight
+ca.width=w;ca.height=h
+var id=0
+var inverted=0
+var b=gl.createBuffer()
+var ab=gl.ARRAY_BUFFER
+gl.bindBuffer(ab,b);gl.bufferData(ab,vtc,gl.STATIC_DRAW)
+var a=gl.getAttribLocation(p,'a')
+gl.enableVertexAttribArray(a)
+gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
+var c=gl.getUniformLocation(p,'ce');gl.uniform2fv(c,[w/2,h/2])//center
+var s=gl.getUniformLocation(p,'s');gl.uniform2fv(s,[w/2,h/2])
+var mode=gl.getUniformLocation(p,'mode')
+var type=gl.getUniformLocation(p,'type')
+var inv=gl.getUniformLocation(p,'inverted')
+var Id=gl.getUniformLocation(p,'id')
+function update(){
+gl.uniform1f(mode,Mode);gl.uniform1f(type,Type);gl.uniform1f(Id,id);gl.uniform1f(inv,inverted);
+}
+var seed={x:w/2,y:h/2}
+ca.onmousemove=(event)=>{var event=event||window.event;seed.x=event.offsetX;seed.y=event.offsetY;R()}
+function R(){
+gl.viewport(0,0,w,h)
+gl.uniform2f(s,seed.x,seed.y)
+gl.drawArrays(gl.TRIANGLES,0,6)
+}
+R()//render
+//htmls
+E('type').onchange=function(){Type=E('type').value;update()}
+E('mode').onchange=function(){Mode=E('mode').value;update()}
+E('frac').onchange=function(){id=E('frac').value;update()}
+E('inv').onchange=function(){inverted=E('inv').value;update()}
+</script>
+</body>
+</html>
