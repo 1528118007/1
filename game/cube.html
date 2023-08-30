@@ -7,30 +7,35 @@
 //variables
 var cast=1
 var pla1=1
-var S1=[1];stage=0
-var S2=[7,8,9,10,11,12,13,14,15,16]
-var S3=[3]
-var S4=[1,2,5,6,7,8,9,10,11]
-var S5=[1,2,4]
-var S6=[1,2,3,4]
-var S7=[1,2,3,4,9,10]
-var S8=[1,2,3,4,5,6,7,8,9,10]
-var S9=[1,3,4,5,6,8,9]
-var S10=[1,2,3,4,9,10]
-var S11=[1,2,3,5]
-var S12=[1,2,5]
-var S13=[1,2,3,4,5,6,17,18,19,22,23]
-var S14=[1,2]
-var Sta=[S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14];
+var S1=[1];stage=0;S2=[7,8,9,10,11,12,13,14,15,16]
+var S3=[3];S4=[1,2,5,6,7,8,9,10,11]
+var S5=[1,2,4];S6=[1,2,3,4]
+var S7=[1,2,3,4,9,10];S8=[1,2,3,4,5,6,7,8,9,10]
+var S9=[1,3,4,5,6,8,9];S10=[1,2,3,4]
+var S11=[1,2,3,5];S12=[1,2,5]
+var S13=[1,2,3,4,5,6,17,18,19,22,23];S14=[1,2]
+var S15=[1,2,3,4,5];S16=[1,2,3,4,5,6,7,8]
+var S17=[1,2,3,4,6,7,11,14];S18=[1,2,3,4,5,6,7,8,9,10]
+var S19=[1,2,3,4,5,6,7,8,9,10,16,17,18,21];S20=[1,2,3,4,5,6,8,12,20,23,24,26]
+var S21=[1,2,5,6,7,8,9,10,11,12,14,15,18];S22=[1,4,5,6]
+var S23=[1,3,4,6,8,10];S24=[1,2,3,5,6,7,8,9]
+var Sta=[S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24];
 function obj(){return Sta[stage]}
 
 //tracks
-var Ti=[1,1,1,1,1,1,1,1,0,0,0,5,1,1]
+var Ti=[1,1,1,1,1,1,1,1,0,0,0,5,1,1,0,1,0,0,0,1,10,2,0,5]
 var T0=[[-10,0],[9,0]];T9=[[-8,-8],[-8,8],[8,8],[8,-8]]
 var T10=[[-6,-6],[-6,6],[6,6],[6,-6],[-5,-6],[-5,5],[5,5],[5,-5],[-4,-5],[-4,4],[4,4],[4,-4],[-3,-4],[-3,3],[3,3],[3,-3],[-2,-3],[-2,2],[2,2],[2,-2],[-1,-2],[-1,1],[1,1],[1,-1],[0,-1],[0,0]]
 var T11=[[-9,-9],[-9,9],[9,9],[9,-9],[-6,-9],[-6,6],[6,6],[6,-6]]
 var T12=[[-5,0],[5,0],[-6,0],[6,0],[-7,0],[7,0],[-8,0],[8,0],[-9,0],[9,0]]
-var Tr=[T0,T0,T0,T0,T0,T0,T0,T0,T9,T10,T11,T12,T0,T0]
+var T15=[[-9,5],[0,5],[0,-5],[9,-5]]
+var T17=[[-8,-8],[8,-8],[8,8],[0,8]]
+var T18=[[-8,8],[8,8],[8,4],[-8,4],[-8,0],[8,0],[8,-4],[-8,-4],[-8,-8],[8,-8]]
+var T19=[[-8,6],[6,6],[6,-6],[-6,-6]]
+var T21=[[0,0],[0,8],[-8,8],[-8,-8],[8,-8],[8,8],[0,8],[0,-10]]
+var T22=[[-10,8],[8,8],[8,-8],[-8,-8],[-8,7]]
+var T23=[[-7,-7],[-5,-7],[-5,-5],[-3,-5],[-3,-3],[-1,-3],[-1,-1],[1,-1],[1,1],[3,1],[3,3],[5,3],[5,5],[7,5],[7,7]]
+var Tr=[T0,T0,T0,T0,T0,T0,T0,T0,T9,T10,T11,T12,T0,T0,T15,T0,T17,T18,T19,T0,T21,T22,T23,T12]
 var Trc=()=>Tr[stage];Tic=()=>Ti[stage];Tc=()=>circ(['p'].concat(Trc()))
 
 var isNum=(x)=>typeof(x)=='number'||typeof(x)=='undefined'
@@ -44,8 +49,8 @@ var add=(x,y)=>{if(isNum(x)&&isNum(y)){return x+y}else{var x1=toList(x).length;y
 var un=(x)=>x!=undefined?x:[]
 var subt=(x,y)=>{if(isNum(x)&&isNum(y)){return x-y}else{var x1=toList(x).length;y1=toList(y).length;return list(0,1,max(x1,y1)).map((i1)=>subt(toList(x)[min(i1,x1-1)],toList(y)[min(i1,y1-1)]))}}
 var mult=(x,y)=>{if(isNum(x)){return x*y}else{var x1=toList(x).length;return list(0,1,x1).map((i2)=>mult(toList(x)[min(i2,x1-1)],y))}}
-function list(x,y,x1){var y1=[];for(i1=0;i1<x1;i1++){y1[i1]=x+i1*y};return y1}
-function clone(x,y){var y1=[];for(i1=0;i1<y;i1++){y1[i1]=x};return y1}
+function list(x,y,x1){var y1=[];for(let i1=0;i1<x1;i1++){y1[i1]=x+i1*y};return y1}
+function clone(x,y){var y1=[];for(let i1=0;i1<y;i1++){y1[i1]=x};return y1}
 var M=(x)=>Math.sqrt(x[0]*x[0]+x[1]*x[1])
 var Di=(x,y)=>M([un(x)[0]-un(y)[0],un(x)[1]-un(y)[1]])
 var pi=Math.PI
@@ -57,47 +62,64 @@ var deg=(x,y,z)=>norm1(norm(D(y,z))-norm(D(y,x)))
 var tr=(x)=>(x+10)*w/20
 var w=400
 var L=(x)=>un(x).length
-var ca=document.getElementById('c');ctx=ca.getContext('2d')
+var elem=(x)=>document.getElementById(x)
+var ca=elem('c');ctx=ca.getContext('2d')
+function text1(){var x;if(!cast){x='off'}else{x='on'};return 'shade effect:'+x}
+function showcast(){elem('div').innerHTML=text1()}
+showcast()
+elem('div').onclick=function(){cast=1-cast;showcast()}
 function moveTo(x){ctx.moveTo(tr(un(x)[0]),tr(-un(x)[1]))}
 function lineTo(x){ctx.lineTo(tr(un(x)[0]),tr(-un(x)[1]))}
 function fillRect(x,y,z){ctx.fillRect(tr(x[0]),tr(-x[1]),y*w/20,z*w/20)}
 function strokeRect(x,y,z){ctx.strokeRect(tr(x[0]),tr(-x[1]),y*w/20,z*w/20)}
-function poly(x){ctx.beginPath();moveTo(x[0]);for(i=1;i<L(x);i++){lineTo(x[i])};ctx.closePath();ctx.fill()}
+function poly(x){ctx.beginPath();moveTo(x[0]);for(let i=1;i<L(x);i++){lineTo(x[i])};ctx.closePath();ctx.fill()}
 var isp=(x)=>x[0]=='p'
 function insp(x,y){var t0=0;x11=L(y);i5=0;while(i5<x11){t0+=deg(y[i5],x,y[(i5+1)%x11]);i5++};return abs(t0)>pi}
 var insc=(x,y)=>Di(x,y[0])<y[1][0]
 var excf=(x)=>Array.from(x).slice(1)
 var ins=(x,y)=>isp(y)?insp(x,excf(y)):insc(x,excf(y))
-function cir(x,y){ctx.beginPath();ctx.arc(tr(x[0]),tr(-x[1]),y*w/20,0,2*pi);ctx.fill()}
+function cir(x,y){ctx.beginPath();ctx.arc(tr(x[0]),tr(-x[1]),max(0,y)*w/20,0,2*pi);ctx.fill()}
 //ray casting method
 var solve=(x1,x2,x3,y1,y2,y3)=>mult([x3*y2-x2*y3,x1*y3-x3*y1],1/(x1*y2-x2*y1))
 var int1=(x,y)=>solve(x[0],x[1],x[2],y[0],y[1],y[2])
-var mean=(x)=>{var y=[0,0];for(j=0;j<L(x);j++){y[0]+=x[j][0];y[1]+=x[j][1]};y[0]/=L(x);y[1]/=L(x);return y}
+var mean=(x)=>{var y=[0,0];for(let j=0;j<L(x);j++){y[0]+=x[j][0];y[1]+=x[j][1]};y[0]/=L(x);y[1]/=L(x);return y}
 var con=(x,y)=>[y[1]-x[1],x[0]-y[0],x[0]*y[1]-x[1]*y[0]]
 var int2=(x,y)=>int1(con(x[0],x[1]),con(y[0],y[1]))
 var inset=(x,y,t)=>abs(t-(x+y)/2)<abs(x-y)/2||x==y
 var sgn=(x)=>!x?0:(x>0?1:-1)
 var otset=(x,y,t)=>(t-x)*(y-x)>0||x==y
 var inseg=(x,y,t)=>inset(x[0],y[0],t[0])&&inset(x[1],y[1],t[1])
+var inset1=(x,y,t)=>abs(t-(x+y)/2)<=abs(x-y)/2||x==y
+var inseg1=(x,y,t)=>inset1(x[0],y[0],t[0])&&inset1(x[1],y[1],t[1])
 var otseg=(x,y,t)=>otset(x[0],y[0],t[0])&&otset(x[1],y[1],t[1])
 var inf=Infinity
 var Deg=(x,y,t)=>abs(deg(x,y,t))
 var arg=(x,y)=>mod(D(x,y),2*pi)
-var indeg=(x,y,t)=>Deg(y,t,x)>=Deg(y,t,pla())&&deg(y,t,x)*deg(y,t,pla())>=0
+var indeg=(x,y,t)=>abs(min(Deg(x,pla(),y)-Deg(x,pla(),t)-Deg(y,pla(),t),Deg(x,t,y)-Deg(x,t,pla())-Deg(y,t,pla())))<1e-5
 var isint=(x,y,t)=>inseg(y[0],y[1],t)&&otseg(x[0],x[1],t)
-var isints=(x,y)=>inseg(y[0],y[1],int2(x,y))&&inseg(x[0],x[1],int2(x,y))
+var isints=(x,y)=>inseg1(y[0],y[1],int2(x,y))&&inseg1(x[0],x[1],int2(x,y))
 var lerp=(x,y,t)=>add(x,mult(subt(y,x),t))
-var tg1=(x,y,r,z)=>add(y,mult(rot(subt(x,y),z*Math.acos(r/Di(x,y))),r/Di(x,y)))
+var tg1=(x,y,r,z)=>{if(r>Di(x,y)){return [inf,0]}else{return add(y,mult(rot(subt(x,y),z*Math.acos(r/Di(x,y))),r/Di(x,y)))}}
 var tg=(x,y,r)=>[tg1(x,y,r,1),tg1(x,y,r,-1)]
-var vtx=(x)=>isp(x)?excf(x):tg(pla(),x[1],un(x[2])[0])
-function int3(x,y){var z=vtx(y);t=[];for(i=0;i<L(z);i++){var x1=[z[i],z[(i+1)%L(z)]];if(isint(x,x1,int2(x,x1))){t[i]=int2(x,x1)}else{t[i]=[inf,0]}};return t}
-function int40(x,i){return int3([pla(),vtx(x)[i]],x).concat(int3([pla(),vtx(x)[i]],border)).filter((t1)=>t1[0]<inf).sort((x1,y1)=>Di(pla(),y1)-Di(pla(),x1))[0]}
-function int4(x,i){var z=vtx(x);
-if(!L(int40(x,i))){return []}else{if(inseg(pla(),z[i],int40(x,i))){return [z[i]]}else if(indeg(z[mod(i-1,L(z))],z[(i+1)%L(z)],z[i])){return []}else{return [z[i],int40(x,i)]}}}
-function int5(x){var t=[];for(i2=0;i2<L(vtx(x));i2++){t=t.concat(int4(x,i2))};return t}
-function int3s(x,y){var z=vtx(y);t=[];for(i=0;i<L(z);i++){var x1=[z[i],z[(i+1)%L(z)]];if(isints(x,x1,int2(x,x1))){t[i]=int2(x,x1)}else{t[i]=[inf,0]}};return t}
+var vtx1=(x)=>isp(x)?excf(x):tg(pla(),x[1],un(x[2])[0])
+var seg=(x,i)=>[x[mod(i,L(x))],x[(i+1)%L(x)]]
+var Seg=(x,i)=>int3s(seg(x,i),border).sort((y,z)=>y[0]-z[0])[0]
+var iv=(x)=>max(abs(x[0]),abs(x[1]))<=10
+var modify=(x,i,y)=>x.filter((y,z)=>z<i).concat(y,x.filter((y,z)=>z>i))
+function cut(x){var t=x;for(let i=0;i<L(x);i++){
+if(!iv(x[i])){var x1=[];y1=[];
+if(iv(x[mod(i-1,L(x))])){x1=[Seg(x,i-1)]};if(iv(x[(i+1)%L(x)])){y1=[Seg(x,i+1)]};
+t=modify(t,i,x1.concat(y1))}
+};return t}
+var vtx=(x)=>cut(vtx1(x))
+function int3s(x,y){var z=vtx1(y);t=[];for(let i=0;i<L(z);i++){var x1=[z[i],z[(i+1)%L(z)]];if(isints(x,x1)){t[i]=int2(x,x1)}else{t[i]=[inf,0]}};return t}
 var isInts=(x,y)=>int3s(x,y).map((z)=>z[0]).concat([inf]).reduce((x1,y1)=>x1<y1?x1:y1)<inf
-function int6(x,y){var t=[];for(i4=0;i4<4;i4++){if(isInts([pla(),y[i4+1]],x)){t=t.concat([y[i4+1]])}};return t}
+function int3(x,y,j,b){var z=vtx(y);t=[];for(let i=0;i<L(z);i++){var x1=[z[i],z[(i+1)%L(z)]];if(isint(x,x1,int2(x,x1))&&(b||(i!=j&&i!=mod(j-1,L(z))))){t=t.concat([int2(x,x1)])}else{t=t.concat([[inf,0]])}};return t}
+function int40(x,i){return int3([pla(),vtx(x)[i]],x,i,false).concat(int3([pla(),vtx(x)[i]],border,-1,true)).filter((t1)=>t1[0]<inf).sort((x1,y1)=>Di(pla(),x1)-Di(pla(),y1))[0]}
+function int4(x,i){var z=vtx(x);
+if(!L(int40(x,i))){return []}else{if(inseg(pla(),z[i],int40(x,i))){return []}else if(indeg(z[mod(i-1,L(z))],z[(i+1)%L(z)],z[i])){return [z[i]]}else{return [z[i],int40(x,i)]}}}
+function int5(x){var t=[];for(let i2=0;i2<L(vtx(x));i2++){t=t.concat(int4(x,i2))};return t}
+function int6(x,y){var t=[];for(let i4=0;i4<4;i4++){if(isInts([pla(),y[i4+1]],x)){t=t.concat([y[i4+1]])}};return t}
 var Dir=(x)=>x.map((y)=>norm(D(mean(x),y)))
 var Dis=(x)=>x.map((y)=>norm(Di(pla(),y)))
 var sdir=(x)=>list(0,1,L(x)).sort((x1,x2)=>{if(Dir(x)[x1]==Dir(x)[x2]){return Dis(x)[x1]-Dis(x)[x2]}else{return Dir(x)[x1]-Dir(x)[x2]}}).map((y)=>x[y])
@@ -108,26 +130,27 @@ function light(x){x.forEach((y)=>{poly(shade(y))})}
 function rot(x,t){return [x[0]*cos(t)-x[1]*sin(t),x[0]*sin(t)+x[1]*cos(t)]}
 var addtr=(t,x)=>isp(t)?[t[0]].concat(add(excf(t),clone(x,L(t)-1))):[t[0],add(x,t[1]),t[2]]
 var multtr=(t,x)=>isp(t)?[t[0]].concat(mult(excf(t),x)):[t[0],t[1],[un(t[2])[0]*x,0]]
-var rottr=(t,x)=>isp(t)?[t[0]].concat(excf(t).map((t1)=>rot(t1,x))):t
-function circ(x){var y=0;for(i=2;i<L(x);i++){y+=Di(x[i],x[i-1])};return y}
+var rottr=(t,x)=>isp(t)?[t[0]].concat(excf(t).map((t1)=>rot(t1,x))):[t[0],rot(t[1],x),t[2]]
+function circ(x){var y=0;for(let i=2;i<L(x);i++){y+=Di(x[i],x[i-1])};return y}
 var Circ=(x)=>circ(x)+Di(x[1],x[L(x)-1])
-function intp(x,t){var t1=t;for(i3=0;i3<=L(x);i3++){var x4=x[i3];x5=x[(i3+1)%L(x)];y=Di(x4,x5);if(t1<y){return lerp(x4,x5,t1/y)}else{t1-=y}}}
+function intp(x,t){var t1=t;for(let i3=0;i3<=L(x);i3++){var x4=x[i3];x5=x[(i3+1)%L(x)];y=Di(x4,x5);if(t1<y){return lerp(x4,x5,t1/y)}else{t1-=y}}}
 var intpc=(x,t)=>add(x[0],rot([x[1][0],0],x[1][1]*t))
 var Intp=(x,t)=>isp(x)?intp(excf(x),max(0,t)):intpc(excf(x),t)
-var init=(x,t,i)=>{return [i,x[5],x[6]==4?xAtp(Intp(x[4],x[5])):x[6],1,un(x[7])[0]>0?un(x[7])[2]:inf,un(x[1])[0]==2?un(x[1])[1]:inf,un(x[1])[0]==5?0:inf,0,0]}
+var init=(x,t,i)=>{return [i,x[5],x[6]>=4?(xAtp(Intp(x[4],max(0,x[5])))+x[6]-4):x[6],1,un(x[7])[0]>0?un(x[7])[2]:inf,un(x[1])[0]==2?un(x[1])[1]:(abs(x[1][0])==6?x[1][3]:inf),un(x[1])[0]==5?0:inf,0,0]}
 function plotobj(x,h){var y=cvtx(x,h);y1=excf(y);if(isp(y)){poly(y1)}else{cir(y1[0],y1[1][0])}}
 var a=(x)=>max(0,x)
 function xAtp(x){return deg([x[0]+1,x[1]],x,pla())}
 var v=4;dt=0.05;ps=0.2
-function getId(r,x){var i=-1;for(i1=0;i1<L(r);i1++){if(r[i1][0]==x-1){i=i1;break}};return i}
+function getId(r,x){var i=-1;for(let i1=0;i1<L(r);i1++){if(r[i1][0]==x-1){i=i1;break}};return i}
 
-function E1(d,r,n,u,t){var h=un(r[n]);x=un(d[u]);x1=x[8]*dt;y=r[max(0,getId(r,h[0]))][1];x2=un(x[7])[1]*dt;h1=false;r1=r;h2=true;var x0=d[max(0,x[2]-1)];var ii=init(x0,t,x[2])
+function E1(d,r,n,u,t){var h=un(r[n]);x=un(d[u]);x1=x[8]*dt;y=r[max(0,getId(r,h[0]))][1];x2=un(x[7])[1]*dt;h1=false;r1=r;h2=true;var x0=d[max(0,x[2]-1)];
+var xnum=x[2];var ii=init(x0,t,x[2])
 var x01=x0
 h0=false
 switch(x[0]){case 1:h[1]+=x1;break
 case 2:h[1]=(h[1]+x1);break
-case 3:h[1]=(h[1]+x1)%Circ(x[4]);break
-case 4:h[1]=min(h[1]+x1,circ(x[4]));break
+case 3:h[1]=mod(h[1]+x1,Circ(x[4]));break
+case 4:h[1]=max(0,min(h[1]+x1,circ(x[4])));break
 default:break}
 switch(un(x[7])[0]){case 1:if(h[4]>0){h[4]=a(h[4]-dt);h[3]+=x2};break
 case 2:if(h[4]>0){h[4]=a(h[4]-dt);h[2]=mod(h[2]+x2,2*pi)};break
@@ -138,14 +161,17 @@ case 2:if(h[5]>0){h[5]=a(h[5]-dt)}else{h0=true;h2=x[2]>0};break
 case 3:if(inset(x[1][1],x[1][2],y)){h0=true;h2=x[2]>0};break
 case 4:if(inset(x[1][3],x[1][4],y)&&inset(x[1][1],x[1][2],h[1])){h0=true;h2=x[2]>0};break
 case 5:if(h[6]>0){h[6]=a(h[6]-dt)}else{h1=true;h[6]=x[1][1]};break
+case 6:if(inset(x[1][1],x[1][2],pla1)){h0=true;h2=x[2]>0}else if(h[5]>0){h[5]=a(h[5]-dt)}else{if(x[2]>0){x0=d[max(0,L(x[1])<5?1:x[1][4]-1)];xnum=x[1][4];h0=true}};break
 case -1:if(inset(x[1][1]-h[1],x[1][2]-h[1],pla1)){h0=true;h2=x[2]>0};break
 default:break}
-r1=r1.filter((x3,y3)=>y3!=n);if(h1){if(x0[5]<0){x0[5]=x0[0]==1?0:h[1]};ii=init(x0,t,x[2]);x01[5]=h[1];ii[2]=init(x01,t,x[2])[2];ii[8]=h[1];
+r1=r1.filter((x3,y3)=>y3!=n)
+if(h0){if(x0[5]<0){x0[5]=x0[0]==1?0:h[1]};ii=init(x0,t,xnum);x01[5]=h[1];ii[2]=init(x01,t,xnum)[2];ii[8]=h[1]}
+if(h1){if(x0[5]<0){x0[5]=x0[0]==1?0:h[1]};ii=init(x0,t,xnum);x01[5]=h[1];ii[2]=init(x01,t,xnum)[2];ii[8]=h[1];
 r1=r1.concat([ii])};if(h2){r1[L(r1)]=h0?ii:h};return r1}
 
 var E2=(d,r,n,t)=>E1(d,r,n,r[n][0]-1,t)
-function E(d,r,t){var x=r;k=0;while(k<L(r)){x=E2(d,x,0,t);k++};return x}
-function Init(d,t){var z=[];k0=0;for(k=0;k<L(d);k++){if(inlist(k+1,obj())){z[k0]=init(d[k],t,k+1);k0++}};return z}
+function E(){var k1=0;while(k1<L(St)){St=E2(cD(),St,0,pla());k1++}}
+function Init(d,t){var z=[];k0=0;for(let k=0;k<L(d);k++){if(inlist(k+1,obj())){z[k0]=init(d[k],t,k+1);k0++}};return z}
 function inlist(x,y){return un(y).filter((q)=>q==x).length>0}
 //stage design
 function pla(){return intp(Trc(),pla1)};
@@ -153,20 +179,25 @@ var dir=0
 function goal(){return intp(Trc(),Tc())}
 var cla=(x,y,t)=>min(y,max(x,t))
 var D1=()=>[[3,[0,0],1,['c',[0,0],[1,0]],['p',[0,5],[0,-5]],5,0,[0,0,0],10]]
-var Data=()=>[D1(),D2(),D3(),D4(),D5(),D6(),D7(),D8(),D9(),D10(),D11(),D12(),D13(),D14()]
+var Data=()=>[D1(),D2(),D3(),D4(),D5(),D6(),D7(),D8(),D9(),D10(),D11(),D12(),D13(),D14(),D15(),D16(),D17(),D18(),D19(),D20(),D21(),D22(),D23(),D24()]
 var St=Init(D1(),pla())
 var border=['p',[10,10],[10,-10],[-10,-10],[-10,10]]
-function plotObj(d,r){for(k=0;k<L(r);k++){plotobj(d[r[k][0]-1],r[k])}}
+function plotObj(d,r){for(let k=0;k<L(r);k++){plotobj(d[r[k][0]-1],r[k])}}
 function sq(x,y){fillRect([x[0]-y,x[1]+y],2*y,2*y)}
 function sqS(x,y){strokeRect([x[0]-y,x[1]+y],2*y,2*y)}
-function Light(d,r){var x=[];for(k=0;k<L(r);k++){x[k]=cvtx(d[r[k][0]-1],r[k])};return x}
+function Light(d,r){var x=[];for(let k=0;k<L(r);k++){x[k]=cvtx(d[r[k][0]-1],r[k])};return x}
 function cvtx(x,h){var y;var x1=Intp(x[4],h[8])
 if(x[0]==1){y=add(x1,rot([h[1],0],h[2]))}else{y=Intp(x[4],h[1])};return addtr(multtr(rottr(un(x)[3],h[2]),h[3]),add(y,[h[7],0]))}
 function plot(d,r){raycast();ctx.fillStyle='rgb(255,0,0)';ctx.strokeStyle='rgb(255,0,0)';sq(pla(),ps);sqS(goal(),ps);psw();ctx.fillStyle='rgb(0,0,0)';plotObj(cD(),St)}
 document.onkeydown=function(event){var event=event||window.event;x=event.keyCode;if(x==37){dir=-1}else if(x==39){dir=1}}
+function mean1(x){if(isp(x)){return mean(excf(x))}else{return x[1]}}
+function ndc(){return Light(cD(),St).map((x)=>Di(pla(),mean1(x))).reduce((x1,y1)=>x1<y1?x1:y1)}
 document.onkeyup=function(event){var event=event||window.event;x=event.keyCode;if(x==37||x==39){dir=0}}
-function raycast(){ctx.clearRect(0,0,400,400);if(cast==1){ctx.fillStyle='rgb(200,200,200)';light(Light(cD(),St))}}
+function setcolor(x){ctx.fillStyle='rgb('+x+','+x+','+x+')'}
+var ls=200
+function raycast(){ctx.clearRect(0,0,400,400);if(cast==1){ctx.fillStyle='rgb('+ls+','+ls+','+ls+')';light(Light(cD(),St))}}
 plot(D1(),St)
+setInterval(game,1000*dt)
 //actions
 function u1(){pla1=cla(0,Tc(),pla1+v*dt*dir)}
 var anim=0
@@ -174,22 +205,31 @@ function u2(){if(anim>0){anim=min(anim+dt,3)};if(anim==3){nextstage()}}
 function u31(){if(inset(0,1,anim)){ctx.strokeStyle='rgba(255,0,0,'+(1-anim)+')';sqS(pla(),anim)}}
 function u32(){if(inset(1,3,anim)){ctx.fillStyle='rgba(255,255,255,'+min(1,anim-1)+')';sq([0,0],10)}}
 var g=true
-function nextstage(){if(stage<L(Data())-1&&g){stage++;pla1=Tic();anim=0;St=Init(cD(),pla())}else if(!g){pla1=Tic();anim=0;St=Init(cD(),pla());g=true}else if(stage>=L(Data())-1&&g){document.getElementById('div').innerHTML='you have passed all the levels'}}
+function nextstage(){if(stage<L(Data())-1&&g){stage++;pla1=Tic();St=Init(cD(),pla());anim=0}else if(!g){pla1=Tic();St=Init(cD(),pla());g=true;anim=0}else if(stage>=L(Data())-1&&g){document.getElementById('div').innerHTML='you have passed all the levels'}}
 function cD(){return Data()[stage]}
 function rest(){g=false;anim=dt}
-function Ins(d,r,x){for(k=0;k<L(r);k++){if(ins(x,cvtx(d[r[k][0]-1],r[k]))){return 1}}}
-function u4(){if(Ins(cD(),St,add(pla(),[0,ps]))==1||Ins(cD(),St,add(pla(),[0,-ps]))==1){rest()}else if(Tc()-pla1<ps){anim=dt}}
-function game(){if(!anim){u4()};u2();St=E(cD(),St,pla());if(g){u1()};plot(cD(),St);u31();u32()}
-setInterval(game,1000*dt)
+function Ins(d,r,x){for(let k=0;k<L(r);k++){if(ins(x,cvtx(d[r[k][0]-1],r[k]))){return 1}}}
+var over=()=>Ins(cD(),St,add(pla(),[0,ps]))==1||Ins(cD(),St,add(pla(),[0,-ps]))==1
+var dynamic=false
+var dynstr=20
+function u4(){if(over()){rest()}else if(Tc()-pla1<ps){anim=dt}}
+function game(){if(!anim){u4()};u2();E();if(g){u1()};plot(cD(),St);u31();u32();if(dynamic){ls=dynstr*ndc()}}
 function swp(){return Trc().slice(1).slice(0,L(Trc())-2)}
 function psw(){swp().forEach((x)=>{poly(excf(addtr(['p',[ps,0],[0,ps],[-ps,0],[0,-ps]],x)))})}
 //built-in shapes
 function rect(x1,x2,y1,y2){return ['p',[x1,x2],[x1,y2],[y1,y2],[y1,x2]]}
 function cross(x){var y=x[0];z=x[1];return ['p',x,[-y,z],[-y,-y],[z,-y],[z,y],[-y,y],[-y,-z],[y,-z],[y,y],[-z,y],[-z,-y],[y,-y]]}
 function icicle(x){return ['p',[0,-x],[-x,0],[0,x],[3*x,0]]}
+function ci(x){return ['c',[0,0],[x,1]]}
+function Ci(x,y,z){return ['c',[y,z],[x,1]]}
+function plane(x){return ['p',[0,0],[-x,-x],[x,0],[-x,x]]}
+function gun(x){return ['p',[x,0],[0,x],[-x,0],[0,-x],[x,0],[-x/4,-x/2.4],[-x/4,x/2.4]]}
+function spike(x){return ['p',[0,x],[3*x,0],[0,-x]]}
+function alley(x1,y1,x,y,z){return ['p',[x1+x,y1-x],[x1+x,y1+x],[x1-x,y1+x],[x1-x,y1-x],[x1-y,y1-x],[x1-y,y1-x+z],[x1+y,y1-x+z],[x1+y,y1-x]]}
 var dm=['c',[0,0],[0,1]]
 //built in objects
 function static(x,i){return [0,[i[0],i[1]],i[2],x,dm,0,0,[0,0,0],0]}
+function Spin(x,y,t,z){return [0,[0,0],1,x,['c',y,[0,1]],0,0,[2,t,z],0]}
 function spin(x,y,t){return [0,[0,0],1,x,['c',y,[0,1]],0,0,[2,t,inf],0]}
 function swing(x,r,t){return [3,[0,0],1,x,['p',[0,0],[0,r]],0,0,[0,0,0],abs(2*r/t)]}
 function Swing(x,r,t){return [3,[0,0],1,x,['p',[0,0],[r,0]],0,0,[0,0,0],abs(2*r/t)]}
@@ -197,13 +237,13 @@ function gate(x,t){return [4,[0,0],1,x,['p',[0,0],[0,t]],0,0,[0,0,0],abs(t)]}
 function Gate(x,t){return [4,[0,0],1,x,['p',[0,0],[t,0]],0,0,[0,0,0],abs(t)]}
 function rotate(x,y,r,d,t){return [2,[0,0],1,x,['c',y,[r,1]],d,0,[0,0,0],2*pi/t]}
 function rail(x,y,r,t){return [1,[2,20],0,x,['p',y,add(y,[1,0])],-1,r,[0,0,0],t]}
-function ci(x){return ['c',[0,0],[x,1]]}
-function plane(x){return ['p',[0,0],[-x,-x],[x,0],[-x,x]]}
+function gate1(x,t,r){return [4,[0,0],1,x,['p',[0,0],[0,r]],-1,0,[0,0,0],t]}
+function expand(x,i,y,t){return [0,[i[0],i[1]],i[2],multtr(x,0.01),Ci(0,y[0],y[1]),0,0,[1,99/t,t],0]}
 function dS(x){stage=x-1;nextstage()}
 
 //warning!stages are coming
 function D2(){return [gate(rect(-5,0,-4.8,-10),-0.5),gate(rect(-5,0,-4.8,10),0.5),gate(rect(0,0,0.2,-10),-0.5),gate(rect(0,0,0.2,10),0.5),gate(rect(5,0,5.2,-10),-0.5),gate(rect(5,0,5.2,10),0.5),static(rect(-5,0,-4.8,-10),[1,4.9,1]),static(rect(-5,0,-4.8,10),[1,4.9,2]),static(rect(0,0,0.2,-10),[1,9.9,3]),static(rect(0,0,0.2,10),[1,9.9,4]),static(rect(5,0,5.2,-10),[1,14.9,5]),static(rect(5,0,5.2,10),[1,14.9,6]),swing(['p',[-3,0],[-2,0],[-2.5,1]],1,1),swing(['p',[-3,0],[-2,0],[-2.5,-1]],-1,1),rotate(ci(0.4),[2.5,0],1,pi,2),rotate(ci(0.4),[2.5,0],1,0,2)]}
-function D3(){return [[3,[0,0],1,ci(5),['p',[0,6],[0,-6]],6,0,[0,0,0],2],[0,[2,2],1,ci(1),dm,0,0,[1,8,0.5],0],[0,[1,6.9],2,ci(1),dm,0,0,[0,0,0],0]]}
+function D3(){return [[3,[0,0],1,ci(4),['p',[0,6],[0,-6]],6,0,[0,0,0],2.5],[0,[2,2],1,ci(1),dm,0,0,[1,6,0.5],0],[0,[1,6.9],2,ci(1),dm,0,0,[0,0,0],0]]}
 var A1=Math.sqrt(3)/2
 function D4(){return [static(['c',[0,9],[1,0]],[5,2,3]),static(['c',[0,-9],[1,0]],[5,2,4]),rail(icicle(0.4),[0,9],4,4),rail(icicle(0.4),[0,-9],4,4),swing(rect(-6,-1,-5,-5),6,30),swing(rect(-4,-1,-3,-5),6,24),swing(rect(-2,-1,-1,-5),6,20),swing(rect(0,-1,1,-5),6,16),swing(rect(2,-1,3,-5),6,12),swing(rect(4,-1,5,-5),6,8),swing(rect(6,-1,7,-5),6,4)]}
 function D5(){return [[4,[2,15],0,['p',[0.75,1.5*A1],[1.5,0],[0.75,-1.5*A1],[-0.75,-1.5*A1],[-1.5,0],[0,0],[-0.75,1.5*A1]],
@@ -223,7 +263,16 @@ function D11(){return [[2,[5,2.1],4,ci(0.4),ci(5),0,0,[0,0,0],-pi/2],[2,[5,2.1],
 function D12(){return [[3,[5,2],3,ci(0.5),['p',[-8,4],[8,4]],0,0,[0,0,0],3],[3,[5,2],4,ci(0.5),['p',[8,4],[-8,4]],0,0,[0,0,0],3],[1,[0,0],1,icicle(0.4),['p',[-8,4],[8,4]],-1,-pi/2,[0,0,0],4],[1,[0,0],1,icicle(0.4),['p',[8,4],[-8,4]],-1,-pi/2,[0,0,0],4],static(['c',[0,8],[0.5,0]],[5,1,6]),rail(icicle(0.4),[0,8],4,4)]}
 function D13(){return [[3,[0,0],1,rect(13,3,18,-3),['p',[0,0],[-6,0]],3,0,[0,0,0],4],[3,[0,0],1,rect(-7,3,-12,-3),['p',[0,0],[-6,0]],3,0,[0,0,0],4],[4,[0,0],1,rect(-10,0.5,10,-0.5),['p',[0,55],[0,1.5]],0,0,[0,0,0],9],[4,[0,0],1,rect(-10,0.5,10,-0.5),['p',[0,-55],[0,-1.5]],0,0,[0,0,0],9],[4,[2,23],15,rect(-7.5,10,-6.5,-10),['p',[0,60],[0,0]],0,0,[0,0,0],20],[4,[2,23],16,rect(7.5,10,6.5,-10),['p',[0,60],[0,0]],0,0,[0,0,0],20],[4,[5,2],10,ci(0.5),['p',[-5,11],[-5,4]],0,0,[0,0,0],5],[4,[5,2],11,ci(0.5),['p',[0,11],[0,8]],0,0,[0,0,0],5],[4,[5,2],12,ci(0.5),['p',[5,11],[5,4]],0,0,[0,0,0],5],[1,[0,0],1,icicle(0.5),['p',[-5,11],[-5,4]],-1,4,[0,0,0],4],[1,[0,0],1,plane(0.5),['p',[0,11],[0,4]],-1,4,[0,0,0],4],[1,[0,0],1,icicle(0.5),['p',[5,11],[5,4]],-1,4,[0,0,0],4],rotate(ci(0.6),[0,0],3,0,2),rotate(ci(0.6),[0,0],3,pi,2),[4,[0,0],1,rect(-7.5,10,-6.5,-10),['p',[0,0],[0,-11]],0,0,[0,0,0],1],[4,[0,0],1,rect(7.5,10,6.5,-10),['p',[0,0],[0,-11]],0,0,[0,0,0],1],static(['c',[11,11],[1,0]],[2,6,7]),static(['c',[11,11],[1,0]],[2,6,8]),static(['c',[11,11],[1,0]],[2,6,9]),[0,[2,1],13,ci(0.01),['c',[3,0],[0,1]],0,0,[1,100,0.6],0],[0,[2,1],14,ci(0.01),['c',[-3,0],[0,1]],0,0,[1,100,0.6],0],static(['c',[11,11],[1,0]],[2,6,20]),static(['c',[11,11],[1,0]],[2,6,21])]}
 function D14(){return [[4,[-1,23,25],0,cross([-0.5,3]),['p',[15,0],[-15,0]],0,1,[2,pi/2,6],5],[3,[5,2],3,rect(-0.5,2,0.5,-2),['p',[8,3],[8,-3]],3,0,[0,0,0],3.1],[3,[2,10],0,rect(-0.5,2,0.5,-2),['p',[8,3],[8,-3]],-1,0,[3,-2,10],4.7]]}
-
+function D15(){return [rail(rect(-1,1,1,-1),[9,5],pi,3),Swing(['c',[3,0],[0.6,0]],-6,2),static(rect(4,-3,5,-7),[1,22.5,6]),static(rect(5,-3,6,-7),[1,23.5,7]),static(rect(6,-3,7,-7),[1,24.5,8]),gate(rect(4,-3,5,-7),3),gate(rect(5,-3,6,-7),4),gate(rect(6,-3,7,-7),5)]}
+function D16(){return [swing(['p',[-8,0],[-7,2],[-6,0]],2,1),swing(['p',[-8,0],[-7,-2],[-6,0]],-2,1),spin(['c',[-5,0],[0.6,0]],[0,0],5),spin(['c',[-4,0],[0.6,0]],[0,0],4),spin(['c',[-3,0],[0.6,0]],[0,0],3),spin(['c',[-2,0],[0.6,0]],[0,0],2),spin(['c',[-1,0],[0.6,0]],[0,0],1),[3,[0,0],1,cross([-0.1,2]),['p',[6,3],[6,-3]],3,0,[2,pi,inf],4]]}
+function D17(){return [spin(cross([-0.2,3]),[-5,-5],pi/4),spin(cross([-0.2,3]),[0,-5],pi/4),spin(cross([-0.2,3]),[-2.5,-11],-pi/4),[4,[1,10.5],16,rect(0,-6,1,-10),['p',[10,0],[3,0]],7,0,[0,0,0],1],[4,[-1,17.5,17.7],16,rect(0,-6,1,-10),['p',[10,0],[3,0]],-1,0,[0,0,0],0],[3,[1,22.6],8,['p',[-1,0],[0,1],[0,-1]],['p',[8,0],[7,0]],0,0,[0,0,0],2],[3,[1,22.6],9,['p',[1,0],[0,1],[0,-1]],['p',[8,0],[9,0]],0,0,[0,0,0],2],[4,[2,1],10,['p',[-1,0],[0,1],[0,-1]],['p',[7.5,0],[8,0]],0,0,[0,0,0],4],[4,[2,1],0,['p',[1,0],[0,1],[0,-1]],['p',[8.5,0],[8,0]],0,0,[0,0,0],4],[4,[2,3],0,['p',[-1,0],[0,1],[1,0],[0,-1]],['p',[8,0],[8,-11]],0,0,[0,0,0],4],static(addtr(alley(0,-2,3,0.6,5.1),[0,8]),[1,36.5,13]),[4,[2,3],0,icicle(0.5),['p',[0,8],[11,8]],0,0,[0,0,0],8],Spin(alley(0,-2,3,0.6,5.1),[0,8],pi/2,1),static(['c',[11,11],[1,0]],[1,36.5,15]),static(['c',[11,11],[1,0]],[2,2,12]),[4,[2,1],5,rect(0,-6,1,-10),['p',[10,0],[3,0]],-1,0,[0,0,0],-1]]}
+function D18(){return [swing(Ci(0.6,-4,10),-20,1),swing(Ci(0.6,-2,10),-20,1),swing(Ci(0.6,0,10),-20,1),swing(Ci(0.6,2,10),-20,1),swing(Ci(0.6,4,10),-20,1),rotate(ci(0.4),[0,0],5,0,6),rotate(ci(0.4),[0,0],5,2*pi/3,6),rotate(ci(0.4),[0,0],5,4*pi/3,6),[4,[0,0],1,ci(1.5),['p',[9.7,-11.5],[9.5,10],[9.5,-11.5]],0,0,[0,0,0],1],[4,[0,0],1,rect(-10,-10,10,10),['p',[0,41.5],[0,-1.5]],0,0,[0,0,0],1]]}
+function D19(){return [spin(alley(0,0,2,1,3),[-3,6],pi),rotate(ci(0.5),[6,6],1.42,0,4),rotate(ci(0.5),[6,6],1.42,pi/2,4),rotate(ci(0.5),[6,6],1.42,pi,4),rotate(ci(0.5),[6,6],1.42,-pi/2,4),static(rect(4,3,8,2),[1,16.4,11]),static(rect(4,2,8,1),[1,17.4,12]),static(rect(4,1,8,0),[1,18.4,13]),static(rect(4,0,8,-1),[1,19.4,14]),static(rect(4,-1,8,-2),[1,20.4,15]),Gate(rect(4,3,8,2),-3),Gate(rect(4,2,8,1),-5),Gate(rect(4,1,8,0),-7),Gate(rect(4,0,8,-1),-9),Gate(rect(4,-1,8,-2),-11),rotate(rect(-1.5,1.5,1.5,0),[1.5,-5.75],0.75,0,2.5),rotate(rect(-1.5,1.5,1.5,0),[1.5,-8.25],0.75,pi,2.5),static(Ci(1,11,11),[1,35,19]),[0,[2,2],20,ci(0.01),Ci(0,-5,-6),0,0,[1,49,1],0],rail(ci(0.5),[-5,-6],0,2),[0,[5,1],22,ci(0.3),Ci(0,-9.5,0),0,0,[0,0,0],0],rail(spike(1/4),[-9.5,0],4,4)]}
+function D20(){return [static(['p',[-10,10],[10,10],[10,6],[8,8],[-8,8],[-10,6]],[0,0,1]),static(['p',[-10,-10],[10,-10],[10,-6],[8,-8],[-8,-8],[-10,-6]],[0,0,1]),[4,[5,2],7,ci(0.4),['p',[-8,8],[8,8],[8,-8],[-8,-8]],0,0,[0,0,0],0],[4,[5,2],7,ci(0.4),['p',[-8,8],[8,8],[8,-8],[-8,-8]],16,0,[0,0,0],0],[4,[5,2],7,ci(0.4),['p',[-8,8],[8,8],[8,-8],[-8,-8]],32,0,[0,0,0],0],[4,[5,2],7,ci(0.4),['p',[-8,8],[8,8],[8,-8],[-8,-8]],48,0,[0,0,0],0],[1,[2,10],0,icicle(0.4),['p',[-8,8],[8,8],[8,-8],[-8,-8]],-1,4,[0,0,0],4],static(ci(0.5),[1,9,9]),[0,[2,1],22,ci(0.5),dm,0,0,[1,6,0.5],0],gate(ci(2),-5),[4,[1,12.3],0,cross([-0.2,3]),['p',[6,11],[3,0]],0,0,[2,-pi/2,inf],12],static(Ci(1,11,11),[1,10,13]),expand(rect(-2,0,2,-1),[1,13.5,15],[6,0],1),[4,[6,14,16,3,16],18,rect(4,1,8,0),['p',[0,0],[0,3]],0,0,[0,0,0],1],[4,[6,14,16,3,17],19,rect(4,-1,8,0),['p',[0,0],[0,-3]],0,0,[0,0,0],1],static(rect(4,4,8,3),[0,0,1]),static(rect(4,-4,8,-3),[0,0,1]),gate1(rect(4,1,8,0),-5,3),gate1(rect(4,-1,8,0),-5,-3),[0,[1,5],21,icicle(0.5),Ci(0,-5,8),0,-pi/2,[0,0,0],0],[4,[0,0],1,icicle(0.5),['p',[-5,8],[-5,-7]],0,-pi/2,[0,0,0],80],static(ci(2),[1,7.9,10]),static(Ci(1,11,11),[1,10,11]),static(Ci(1,11,11),[1,10,25]),expand(rect(-2,0,2,1),[1,13.5,14],[6,0],1),expand(ci(1),[5,1,27],[7,9],1),rail(ci(0.5),[7,9],-pi/2,4)]}
+function D21(){return [static(rect(-5,10,-4,6),[1,11.8,3]),static(rect(5,10,4,6),[1,66.8,4]),gate(rect(-5,10,-4,6),-2.3),gate(rect(5,10,4,6),-2.3),Swing(['p',[0,0.5],[0,-0.5],[-2.5,0]],-7.5,1),Swing(['p',[0,0.5],[0,-0.5],[2.5,0]],7.5,1),swing(['p',[-6,-8],[-5,-8],[-5.5,-7]],1,1),swing(['p',[-6,-8],[-5,-8],[-5.5,-9]],-1,1),swing(['p',[6,-8],[5,-8],[5.5,-7]],1,1),swing(['p',[6,-8],[5,-8],[5.5,-9]],-1,1),[2,[1,72],13,ci(0.5),Ci(2,0,-8),0,0,[0,0,0],pi],[2,[1,72],13,ci(0.5),Ci(2,0,-8),pi,0,[0,0,0],pi],[0,[0,0],1,ci(0.5),Ci(2,0,-8),-1,0,[0,0,0],0],static(rect(-3,6,0,5),[1,73.7,16]),static(rect(3,6,0,5),[1,73.7,17]),Gate(rect(-3,6,0,5),-3),Gate(rect(3,6,0,5),3),static(Ci(0.4,0,10),[5,2,19]),rail(icicle(0.4),[0,10],-pi/2,2)]}
+function D22(){return [swing(['p',[-8,12.5],[-6,8.5],[-4,12.5],[-2,8.5],[0,12.5],[2,8.5],[4,12.5],[6,8.5],[8,12.5]],-2,1),[3,[2,1],3,ci(0.02),['p',[7,0],[9,0]],-1,0,[1,99,1],1.3],[3,[2,1],2,ci(2),['p',[7,0],[9,0]],-1,0,[1,-0.99,1],1.3],static(Ci(1,11,11),[2,0,2]),static(Ci(0.5,-9.5,-8),[5,2,7]),static(Ci(0.5,-9.5,-8),[5,2,8]),[2,[2,8],0,ci(0.4),Ci(1,-9.5,-8),0,0,[3,3,8],pi],[2,[2,8],0,ci(0.4),Ci(1,-9.5,-8),pi,0,[3,3,8],pi]]}
+function D23(){return [static(rect(-0.5,1,0.5,-3),[1,12.3,2]),gate(rect(-0.5,1,0.5,-3),-2.3),[0,[2,0],3,gun(0.6),Ci(0,-9.4,-9.4),0,4,[0,0,0],0],static(Ci(0,-9.4,-9.4),[5,2*Math.random(),5]),rail(spike(1/4),[-9.4,-9.4],4,4),[3,[5,2*Math.random()],7,ci(0.3),['p',[-7,-9],[7,-9]],0,0,[0,0,0],2],[1,[2,5],0,spike(1/4),['p',[-7,-9],[7,-9]],-1,pi/2,[0,0,0],4],static(rect(-2.5,-1,-1.5,-5),[1,8.3,9]),gate(rect(-2.5,-1,-1.5,-5),2.3),static(rect(2.5,-1,1.5,3),[1,16.3,11]),gate(rect(2.5,-1,1.5,3),2.3)]}
+function D24(){var x=rect(1,-0.2,-1,0.2);return [swing(rect(-10,1,10,10),9,4),[3,[5,1],4,ci(0.2),['p',[-9,9],[9,9]],0,0,[0,0,0],3],[3,[5,1],4,ci(0.2),['p',[-9,9],[9,9]],18,0,[0,0,0],-3],[1,[2,5],0,x,['p',[-9,9],[9,9]],-1,-pi/2,[0,0,0],4],static(Ci(0.2,0,9),[5,2,10]),static(Ci(0.2,0,9),[5,2,11]),static(Ci(0.2,0,9),[5,2,12]),static(Ci(0.2,0,9),[5,2,13]),static(Ci(0.2,0,9),[5,2,14]),rail(x,[0,9],4,4),rail(x,[0,9],4+pi/8,4),rail(x,[0,9],4+pi/4,4),rail(x,[0,9],4+7*pi/4,4),rail(x,[0,9],4+15*pi/8,4)]}
 </script>
 </body>
 </html>
