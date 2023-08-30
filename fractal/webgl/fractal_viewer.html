@@ -3,8 +3,9 @@
 <body>
 
 <canvas id='c'></canvas><br>
+<div id='d'></div>
 Type:(0 for julia,1 for mandelbrot)<input type="text" id="type" value="0"><br>
-Mode:<select id="mode" onchange='getSelectValue(this.value)'><option value='0'>divergent</option><option value='1'>convergent</option></select>
+Mode:<select id="mode"><option value='0'>divergent</option><option value='1'>convergent</option></select>
 Select fractal:<select id="frac">
 <option value='0'>mandelbrot set</option>
 <option value='1'>nova fractal</option>
@@ -14,8 +15,12 @@ Select fractal:<select id="frac">
 <option value='5'>magnet fractal 2</option>
 <option value='6'>phoenix fractal</option>
 <option value='7'>buffalo fractal</option>
+<option value='8'>multibrot</option>
+<option value='9'>z^n-1 nova</option>
 </select><br>
 0 for normal fractal,1 for inverted fractal:<input type="text" id="inv" value="0">
+<div id='adjt'>Adjust type:constant</div>
+
 
 <script id='v' type='x-shader/x-vertex'>
 attribute vec4 a;
@@ -27,8 +32,12 @@ void main(){gl_Position=vec4(a);gl_PointSize=1.0;}
 precision highp float;
 #endif
 uniform vec2 ce;uniform vec2 s;uniform float mode;uniform float type;
-uniform float id;uniform float inverted;
-float es=64.0;
+uniform float id;uniform float inverted;uniform vec2 R1;
+float es=64.0;float r=min(ce.x,ce.y)*0.5;
+vec2 R=2.0*(R1-ce)/r;
+float A=0.0;float B=-1.0;
+vec2 L(){float x=sqrt(abs(A*A+4.0*B));
+if(A*A+4.0*B<0.0){return vec2(A/2.0,x/2.0);}else{return vec2((A+x)/2.0,0.0);}}
 //functions
 vec2 mult(vec2 x,vec2 y){return vec2(x.x*y.x-x.y*y.y,x.x*y.y+x.y*y.x);}
 vec2 sqr(vec2 x){return mult(x,x);}
@@ -47,6 +56,20 @@ float sinh(float x){return (exp(x)-exp(-x))/2.0;}
 vec2 Sin(vec2 x){return vec2(sin(x.x)*cosh(x.y),cos(x.x)*sinh(x.y));}
 vec2 Cos(vec2 x){return vec2(cos(x.x)*cosh(x.y),-sin(x.x)*sinh(x.y));}
 vec2 Exp(vec2 x){return exp(x.x)*vec2(cos(x.y),sin(x.y));}
+vec2 Ln(vec2 x){return vec2(log(M(x)),atan(x.y,x.x));}
+vec2 Pow(vec2 x,vec2 y){if(x.x==0.0&&x.y==0.0){return vec2(0,0);}else{return Exp(mult(y,Ln(x)));}}
+
+//functions of arbitary complex
+vec2 cons(vec2 x,vec2 y){return div(B*x,L())+mult(L(),y)+mult(x-y,vec2(0,1));}
+//x is f(z.x+L()*z.y),y is f(z.x-B*z.y/L())
+vec2 cons1(vec2 x){return vec2(x.x,0.0)+x.y*L();}
+vec2 cons2(vec2 x){return vec2(x.x,0.0)+x.y*B*rec(L());}
+vec2 multa(vec2 x,vec2 y){return vec2(x.x*y.x+B*x.y*y.y,x.x*y.y+x.y*y.x+A*x.y*y.y);}
+vec2 Sina(vec2 x){return cons(Sin(cons1(x)),Sin(cons2(x)));}
+vec2 Cosa(vec2 x){return cons(Cos(cons1(x)),Cos(cons2(x)));}
+vec2 Expa(vec2 x){return cons(Exp(cons1(x)),Exp(cons2(x)));}
+vec2 Lna(vec2 x){return cons(Ln(cons1(x)),Ln(cons2(x)));}
+
 
 bool isConv(vec2 x,vec2 x_pre){
 float dist=M(x-x_pre);
@@ -55,13 +78,15 @@ return (dist<es&&mode==0.0)||(dist>1.0/es&&mode==1.0);
 vec2 zold=vec2(0,0);
 //built-in fractals
 vec2 fJ(vec2 x,vec2 c){return sqr(x)+c;}
-vec2 fN(vec2 x,vec2 c){return 2.0*x/3.0+rec(sqr(x))/3.0+c;}
+vec2 fN(vec2 x,vec2 c){return mult(vec2(1,0)-R/3.0,x)+mult(R,rec(sqr(x))/3.0)+c;}
 vec2 fBs(vec2 x,vec2 c){return vec2(x.x*x.x-x.y*x.y+c.x,abs(x.x*x.y)*2.0+c.y);}
 vec2 fL(vec2 x,vec2 c){return mult(c,x-sqr(x));}
 vec2 fM1(vec2 x,vec2 c){return sqr(div(sqr(x)+c-vec2(1,0),2.0*x+c-vec2(2,0)));}
-vec2 fM2(vec2 x,vec2 c){return sqr(vec2(1,0)+div(cbr(vec2(1,0)),sqr(c)+3.0*mult(c-vec2(1,0),x-vec2(1,0))));}
-vec2 fP(vec2 x,vec2 c){return sqr(x)+0.5*zold+c;}
+vec2 fM2(vec2 x,vec2 c){return sqr(vec2(1,0)+div(cbr(x-vec2(1,0)),sqr(c)+3.0*mult(x+c-vec2(1,0),x-vec2(1,0))));}
+vec2 fP(vec2 x,vec2 c){return sqr(x)+mult(R,zold)+c;}
 vec2 fBf(vec2 x,vec2 c){vec2 x1=vec2(abs(x.x),abs(x.y));return sqr(x1)-x1+c;}
+vec2 fj(vec2 x,vec2 c){return c+Pow(x,R);}
+vec2 fn(vec2 x,vec2 c){return mult(x,vec2(1,0)-rec(R))+div(Pow(x,vec2(1,0)-R),R)+c;}
 //main function
 vec2 f(vec2 x,vec2 c){vec2 y;
 if(id==0.0){y=fJ(x,c);}
@@ -72,12 +97,12 @@ else if(id==4.0){y=fM1(x,c);}
 else if(id==5.0){y=fM2(x,c);}
 else if(id==6.0){y=fP(x,c);}
 else if(id==7.0){y=fBf(x,c);}
-else{y=x+c;}
+else if(id==8.0){y=fj(x,c);}
+else if(id==9.0){y=fn(x,c);}
+else{y=c;}
 return y;}
 
 void main(){
-float r=min(ce.x,ce.y)*0.5;
-
 vec2 fr=vec2(gl_FragCoord);
 vec2 cpre=(s-ce)/r;vec2 zpre=(fr-ce)/r;
 vec2 z;vec2 C;
@@ -93,8 +118,8 @@ z=z1;
 break;
 }
 }
-I=sqrt(I);
-I/=10.0;gl_FragColor=vec4(I,I,I,1);}
+I=sqrt(I)/10.0;
+gl_FragColor=vec4(I,I,I,1);}
 </script>
 
 
@@ -133,6 +158,7 @@ gl.enableVertexAttribArray(a)
 gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
 var c=gl.getUniformLocation(p,'ce');gl.uniform2fv(c,[w/2,h/2])//center
 var s=gl.getUniformLocation(p,'s');gl.uniform2fv(s,[w/2,h/2])
+var R=gl.getUniformLocation(p,'R1');gl.uniform2fv(R,[w/2+h/8,h/2])
 var mode=gl.getUniformLocation(p,'mode')
 var type=gl.getUniformLocation(p,'type')
 var inv=gl.getUniformLocation(p,'inverted')
@@ -141,18 +167,34 @@ function update(){
 gl.uniform1f(mode,Mode);gl.uniform1f(type,Type);gl.uniform1f(Id,id);gl.uniform1f(inv,inverted);
 }
 var seed={x:w/2,y:h/2}
-ca.onmousemove=(event)=>{var event=event||window.event;seed.x=event.offsetX;seed.y=event.offsetY;R()}
-function R(){
+var rel={x:w/2+h/8,y:h/2}
+var adjt=0
+ca.onmousemove=(event)=>{var event=event||window.event;
+var x=event.offsetX;y=event.offsetY;
+if(!adjt){seed.x=x;seed.y=y}else{rel.x=x;rel.y=y}
+render()}
+function render(){
 gl.viewport(0,0,w,h)
+if(!adjt){
 gl.uniform2f(s,seed.x,seed.y)
+}else{
+gl.uniform2f(R,rel.x,rel.y)
+}
 gl.drawArrays(gl.TRIANGLES,0,6)
 }
-R()//render
+render()
 //htmls
 E('type').onchange=function(){Type=E('type').value;update()}
 E('mode').onchange=function(){Mode=E('mode').value;update()}
 E('frac').onchange=function(){id=E('frac').value;update()}
 E('inv').onchange=function(){inverted=E('inv').value;update()}
+ca.onclick=function(){adjt=1-adjt;E('adjt').innerHTML='Adjust type:'+['constant','relation number'][adjt]}
+//debug
+function debug(){var V=gl.createShader(gl.VERTEX_SHADER)
+var F=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(V,vs);gl.shaderSource(F,fs)
+gl.compileShader(V);gl.compileShader(F)
+E('d').innerHTML='vertex shader:'+gl.getShaderInfoLog(V)+'<br>'+'fragment shader:'+gl.getShaderInfoLog(F)}
 </script>
 </body>
 </html>
