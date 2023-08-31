@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id='c'></canvas><br>
+<div id='d'></div>
+
+Parameters:<br>
+a=<input type='text' id='ia' value='x'>
+b=<input type='text' id='ib' value='y'><br>
+Equation:<br>
+<input type='text' id='i' value='x*x+pow(y-pow(x,2/3),2)-1'>=0
+
+
+<script id='v' type='x-shader/x-vertex'>
+attribute vec4 a;
+void main(){gl_Position=vec4(a);gl_PointSize=1.0;}
+</script>
+
+<script id='f' type='x-shader/x-fragment'>
+#ifdef GL_ES
+precision highp float;
+#endif
+uniform vec2 ce;
+uniform float r;
+uniform float m;
+float sgn(float x){return x>0.0?1.0:(x<0.0?-1.0:0.0);}
+float f(float x,float y){return 1.23;}
+float a(float x,float y){return 2.34;}
+float b(float x,float y){return 3.45;}
+float F(vec2 x){return sgn(f(x.x/r,x.y/r));}
+void main(){
+vec2 fr=vec2(gl_FragCoord);float s=0.5;
+vec2 v1=(fr+vec2(s,s)-ce);
+vec2 v2=(fr+vec2(s,-s)-ce);
+vec2 v3=(fr+vec2(-s,-s)-ce);
+vec2 v4=(fr+vec2(-s,s)-ce);
+if(abs(F(v1)+F(v2)+F(v3)+F(v4))<4.0){gl_FragColor=vec4(1,1,1,1);}else{gl_FragColor=vec4(0,0,0,1);}
+}
+</script>
+
+
+<script>
+var E=(x)=>document.getElementById(x)
+var ca=E('c');gl=ca.getContext('webgl')
+var vs=E('v').innerText;fs=E('f').innerText
+var Sa='x'
+var Sb='y'
+var S='x*x+pow(y-pow(x,2.0/3.0),2.0)-1.0'
+var p=gl.createProgram()
+var V=gl.createShader(gl.VERTEX_SHADER)
+var F=gl.createShader(gl.FRAGMENT_SHADER)
+function Fs(x){return x.replace('2.34',Sa).replace('3.45',Sb).replace('1.23',S.replaceAll('a','a(x,y)').replaceAll('b','b(x,y)'))}
+gl.shaderSource(V,vs);gl.shaderSource(F,Fs(fs))
+gl.compileShader(V);gl.compileShader(F)
+gl.attachShader(p,V);gl.attachShader(p,F)
+gl.linkProgram(p)
+gl.useProgram(p)
+var vtc=new Float32Array([-1,1,1,1,1,-1,-1,1,1,-1,-1,-1])
+
+
+//nothing here lmao
+
+
+var w=window.innerWidth;h=window.innerHeight
+ca.width=w;ca.height=h
+var b=gl.createBuffer()
+var ab=gl.ARRAY_BUFFER
+gl.bindBuffer(ab,b);gl.bufferData(ab,vtc,gl.STATIC_DRAW)
+var a=gl.getAttribLocation(p,'a')
+var m1=gl.getUniformLocation(p,'m');gl.uniform1f(m1,0)
+gl.enableVertexAttribArray(a)
+gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
+var c=gl.getUniformLocation(p,'ce');gl.uniform2fv(c,[w/2,h/2])//center
+var r=gl.getUniformLocation(p,'r');gl.uniform1f(r,h/10)
+function split(x){let t=[];st=true;let y='';for(let i=0;i<x.length;i++){
+y=x.charAt(i);if((y=='.'&&!st)||(parseFloat(y)==0||parseFloat(y))){
+if(st){t.push(y);st=false}else{t[t.length-1]+=y}
+}else{
+t.push(y);st=true
+}
+};return t}
+function float(x){var t='';y=split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});return t}
+var m=0
+var T=5;dt=0.05
+function render(){
+gl.viewport(0,0,w,h)
+
+gl.uniform1f(r,Math.min(w,h)/10)
+gl.uniform1f(m1,m)
+gl.drawArrays(gl.TRIANGLES,0,6)
+}
+function anim(){m=(m+dt/T)%1;render()}
+setInterval(anim,1000*dt)
+
+function check(x){let S1=x;shader=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(shader,fs.replace('1.23',S1));gl.compileShader(shader);return gl.getShaderInfoLog(shader).length==0}
+var R=()=>Math.min(w,h)/10
+function updateShader(){gl.shaderSource(F,Fs(fs));gl.compileShader(F);gl.linkProgram(p)
+a=gl.getAttribLocation(p,'a')
+gl.enableVertexAttribArray(a)
+gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
+c=gl.getUniformLocation(p,'ce');gl.uniform2fv(c,[w/2,h/2])
+r=gl.getUniformLocation(p,'r');gl.uniform1f(r,R())
+render()}
+//htmls
+E('i').onchange=function(){var x1=float(E('i').value);if(check(x1)){S=x1;updateShader()}}
+E('ia').onchange=function(){var x1=float(E('i').value);if(check(x1)){Sa=x1;updateShader()}}
+E('ib').onchange=function(){var x1=float(E('i').value);if(check(x1)){Sb=x1;updateShader()}}
+//debug
+function debug(){var V=gl.createShader(gl.VERTEX_SHADER)
+var F=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(V,vs);gl.shaderSource(F,fs)
+gl.compileShader(V);gl.compileShader(F)
+E('d').innerHTML='vertex shader:'+gl.getShaderInfoLog(V)+'<br>'+'fragment shader:'+gl.getShaderInfoLog(F)}
+</script>
+</body>
+</html>
