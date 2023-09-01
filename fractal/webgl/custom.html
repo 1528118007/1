@@ -2,7 +2,7 @@
 <html>
 <head><style>input{  
 border:none;
-  width：1000px;
+  width：500px;
   outline:medium;
   }
   </style></head>
@@ -12,7 +12,10 @@ border:none;
 <div id='d'></div>
 Type:<select id='type'>
 <option value='0'>julia</option><option value='1'>mandelbrot</option>
-</select><br>
+</select>
+Start value:<select id='type1'>
+<option value='0'>z_0</option><option value='2'>z_0+c</option></select>
+<br>
 Mode:<select id="mode"><option value='0'>divergent</option><option value='1'>convergent</option></select>
 Fractal formula:<input type='text' id='frac' value='sqr(z)+c'><br>
 Inversion:<select id='inv'>
@@ -20,10 +23,30 @@ Inversion:<select id='inv'>
 </select>
 <div id='adjt'>Adjust type:constant</div><br>
 functions:mult for complex number multiplication,rec for 1/x,div for x/y<br>
-i is imaginary unit<br>
-built-in functions:Sin,Cos,Exp,Pow<br>
-c is the constant,R is relation number,zold is last iteration point
-
+i is imaginary unit,k is real unit<br>
+built-in functions:Sin,Cos,Tan,Exp,Pow,Sqrt<br>
+c is the constant,R is relation number,zold is last iteration point<br>
+Julia set:z2+c<br>Nova fractal:2*z/3+rec(z2)/3+c<br>
+Burning ship fractal:vec2(u*u-v*v,2*abs(u*v))-c<br>
+Lambda fractal:mult(c,z-z2)<br>Phoenix fractal:z2+c+mult(zold,R)<br>
+Buffalo fractal:vec2(u*u-v*v-abs(u),2*abs(u*v)-abs(v))-c<br>
+Mandelbar:conj(z2)+c<br>
+Magnet frac 1:sqr(div(z2+c-k,2*z+c-2*k))<br>
+Magnet frac 2:sqr(k+div(cbr(z-k),sqr(c)+3*mult(z-k,z+c-k)))<br>
+Barnsley frac 1:mult(c,z-sign(u)*k)<br>
+Barnsley frac 2:mult(c,z-k*sign(u*n+v*m))<br>
+Barnsley frac 3:z2-k+c*min(0,u)<br>
+Relaxed nova:mult(z,k-R/3)+mult(R/3,rec(z2))+c<br>
+z^n-1 nova:mult(z,k-rec(R))+div(rec(z2),R)+c<br>
+------More awesome fractals------<br>
+Orbit boost julia:sqr(M(z)&lt;0.5?2*z:z)+c<br>
+type 2 phoenix:z2+n*zold+m*k<br>
+Chaosbrot:c+k*(u*u-v*v)+u*v*R<br>
+Celtic z^2:z2-2*min(0,u*u-v*v)*k-c<br>
+Mitch's mandel:mult(c,z2+rec(z2))<br>
+frothy basin(4th order):sqr(z2)-mult(c,conj(z))<br>
+Szegedi butterfly 1:vec2(v*v-sqrt(abs(u)),u*u-sqrt(abs(v)))+c<br>
+Szegedi butterfly 2:vec2(u*u-sqrt(abs(v)),v*v-sqrt(abs(u)))+c
 <script id='v' type='x-shader/x-vertex'>
 attribute vec4 a;
 void main(){gl_Position=vec4(a);gl_PointSize=1.0;}
@@ -35,7 +58,8 @@ precision highp float;
 #endif
 uniform vec2 ce;uniform vec2 s;uniform float mode;uniform float type;
 uniform float id;uniform float inverted;uniform vec2 R1;
-vec2 i=vec2(0,1);
+float I=0.0;
+vec2 i=vec2(0,1);vec2 k=vec2(1,0);
 float es=64.0;float r=min(ce.x,ce.y)*0.5;
 vec2 R=2.0*(R1-ce)/r;
 float A=0.0;float B=-1.0;
@@ -58,38 +82,23 @@ float cosh(float x){return (exp(x)+exp(-x))/2.0;}
 float sinh(float x){return (exp(x)-exp(-x))/2.0;}
 vec2 Sin(vec2 x){return vec2(sin(x.x)*cosh(x.y),cos(x.x)*sinh(x.y));}
 vec2 Cos(vec2 x){return vec2(cos(x.x)*cosh(x.y),-sin(x.x)*sinh(x.y));}
+vec2 Tan(vec2 x){return div(Sin(x),Cos(x));}
 vec2 Exp(vec2 x){return exp(x.x)*vec2(cos(x.y),sin(x.y));}
 vec2 Ln(vec2 x){return vec2(log(M(x)),atan(x.y,x.x));}
 vec2 Pow(vec2 x,vec2 y){if(x.x==0.0&&x.y==0.0){return vec2(0,0);}else{return Exp(mult(y,Ln(x)));}}
-
-//functions of arbitary complex
-vec2 cons(vec2 x,vec2 y){return div(B*x,L())+mult(L(),y)+mult(x-y,vec2(0,1));}
-//x is f(z.x+L()*z.y),y is f(z.x-B*z.y/L())
-vec2 cons1(vec2 x){return vec2(x.x,0.0)+x.y*L();}
-vec2 cons2(vec2 x){return vec2(x.x,0.0)+x.y*B*rec(L());}
-vec2 multa(vec2 x,vec2 y){return vec2(x.x*y.x+B*x.y*y.y,x.x*y.y+x.y*y.x+A*x.y*y.y);}
-vec2 Sina(vec2 x){return cons(Sin(cons1(x)),Sin(cons2(x)));}
-vec2 Cosa(vec2 x){return cons(Cos(cons1(x)),Cos(cons2(x)));}
-vec2 Expa(vec2 x){return cons(Exp(cons1(x)),Exp(cons2(x)));}
-vec2 Lna(vec2 x){return cons(Ln(cons1(x)),Ln(cons2(x)));}
+vec2 Sqrt(vec2 x){return vec2(sqrt(0.5*(M(x)+x.x)),sign(x.y)*sqrt(0.5*(M(x)-x.x)));}
+vec2 conj(vec2 x){return vec2(x.x,-x.y);}
+vec2 flip(vec2 x){return x.yx;}
+vec2 rot(vec2 x,float t){return vec2(x.x*cos(t)-x.y*sin(t),x.x*sin(t)+x.y*cos(t));}
 
 
 bool isConv(vec2 x,vec2 x_pre){
 float dist=M(x-x_pre);
 return (dist<es&&mode==0.0)||(dist>1.0/es&&mode==1.0);
 }
+float loga(float x){return log(abs(x));}
 vec2 zold=vec2(0,0);
-//built-in fractals
-vec2 fJ(vec2 x,vec2 c){return sqr(x)+c;}
-vec2 fN(vec2 x,vec2 c){return mult(vec2(1,0)-R/3.0,x)+mult(R,rec(sqr(x))/3.0)+c;}
-vec2 fBs(vec2 x,vec2 c){return vec2(x.x*x.x-x.y*x.y+c.x,abs(x.x*x.y)*2.0+c.y);}
-vec2 fL(vec2 x,vec2 c){return mult(c,x-sqr(x));}
-vec2 fM1(vec2 x,vec2 c){return sqr(div(sqr(x)+c-vec2(1,0),2.0*x+c-vec2(2,0)));}
-vec2 fM2(vec2 x,vec2 c){return sqr(vec2(1,0)+div(cbr(x-vec2(1,0)),sqr(c)+3.0*mult(x+c-vec2(1,0),x-vec2(1,0))));}
-vec2 fP(vec2 x,vec2 c){return sqr(x)+mult(R,zold)+c;}
-vec2 fBf(vec2 x,vec2 c){vec2 x1=vec2(abs(x.x),abs(x.y));return sqr(x1)-x1+c;}
-vec2 fj(vec2 x,vec2 c){return c+Pow(x,R);}
-vec2 fn(vec2 x,vec2 c){return mult(x,vec2(1,0)-rec(R))+div(Pow(x,vec2(1,0)-R),R)+c;}
+float d=0.0;
 //main function
 vec2 f(vec2 z,vec2 c){return vec2(11,11);}
 
@@ -99,19 +108,21 @@ vec2 fr=vec2(gl_FragCoord);
 vec2 cpre=(s-ce)/r;vec2 zpre=(fr-ce)/r;
 vec2 z;vec2 C;
 if(inverted==1.0){zpre=rec(zpre);}
-if(type==0.0){z=zpre;C=cpre;}else if(type==1.0){z=cpre;C=zpre;}else{z=zpre;C=zpre;}
-float I=0.0;
+if(type==0.0){z=zpre;C=cpre;}else if(type==1.0){z=cpre;C=zpre;}else if(type==2.0){z=zpre;C=cpre+zpre;}else{z=zpre+cpre;C=zpre;}
 for(int j=0;j<100;j++){
 if(isConv(z,zold)){
 I++;vec2 z1=f(z,C);
 zold=z;
 z=z1;
 }else{
+d=loga(loga(M(z-zold)));
 break;
 }
 }
-I=sqrt(I)/10.0;
-gl_FragColor=vec4(I,I,I,1);}
+if(I==100.0){gl_FragColor=vec4(0.0,0.0,0.0,1.0);}else{
+I=(sqrt(I-(mode==0.0?d:0.0)))/10.0;
+gl_FragColor=vec4(3.0*I-1.0,1.0-abs(I*3.0-2.0),1.0-abs(I*1.5-0.5),1);}
+}
 </script>
 
 
@@ -128,14 +139,24 @@ gl.compileShader(V);gl.compileShader(F)
 gl.attachShader(p,V);gl.attachShader(p,F)
 gl.linkProgram(p)
 gl.useProgram(p)
+var getstr=(str,z)=>str.charAt(0)+z+str.charAt(str.length-1)
 var vtc=new Float32Array([-1,1,1,1,1,-1,-1,1,1,-1,-1,-1])//vertices
+function slice(x){return x.slice(1).slice(0,-1)}
+var rep=(x,y,z)=>{let t=new RegExp('[^a-z]'+y+'[^a-z]','g');
+let x1='-'+x+'-'
+return slice(x1.replace(t,(str)=>getstr(str,z)).replace(t,(str)=>getstr(str,z)))}
+function Rep(x,y,z){let t=x;for(let i=0;i<y.length;i++){t=rep(t,y[i],z[i])};return t}
 
-
-var Mode=0;Type=0
+var Mode=0;Type=0;Type1=0
 //mode 0 for divergent,1 for convergent
 //type 0 for julia,1 for mandelbrot
+//type1 is WTF
+
+
 
 //nothing here lmao
+
+
 
 var w=window.innerWidth;h=window.innerHeight
 ca.width=w;ca.height=h
@@ -156,19 +177,21 @@ var type=gl.getUniformLocation(p,'type')
 var inv=gl.getUniformLocation(p,'inverted')
 var Id=gl.getUniformLocation(p,'id')
 function update(){
-gl.uniform1f(mode,Mode);gl.uniform1f(type,Type);gl.uniform1f(Id,id);gl.uniform1f(inv,inverted);
+gl.uniform1f(mode,Mode);gl.uniform1f(type,Type+Type1);gl.uniform1f(Id,id);gl.uniform1f(inv,inverted);
 }
 var seed={x:w/2,y:h/2}
 var rel={x:w/2+h/8,y:h/2}
 var adjt=0
-function split(x){let t=[];st=true;let y='';for(let i=0;i<x.length;i++){
-y=x.charAt(i);if((y=='.'&&!st)||(parseFloat(y)==0||parseFloat(y))){
+function split(x){let t=[];st=true;
+let x1=Rep(x,['z2','z3','u','v','m','n'],['sqr(z)','cbr(z)','z.x','z.y','c.x','c.y'])
+let y='';for(let i=0;i<x1.length;i++){
+y=x1.charAt(i);if((y=='.'&&!st)||(parseFloat(y)==0||parseFloat(y))){
 if(st){t.push(y);st=false}else{t[t.length-1]+=y}
 }else{
 t.push(y);st=true
 }
 };return t}
-function float(x){var t='';y=split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});return t.replaceAll('vec2.0','vec2')}
+function float(x){var t='';y=split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});return t.replace(/vec2.0/g,'vec2')}
 ca.onmousemove=(event)=>{var event=event||window.event;
 var x=event.offsetX;y=event.offsetY;
 if(!adjt){seed.x=x;seed.y=y}else{rel.x=x;rel.y=y}
@@ -198,6 +221,7 @@ inv=gl.getUniformLocation(p,'inverted')}
 //htmls
 function value(x){return parseFloat(E(x).value)}
 E('type').onchange=function(){Type=value('type');update()}
+E('type1').onchange=function(){Type1=value('type1');update()}
 E('mode').onchange=function(){Mode=value('mode');update()}
 E('frac').onchange=function(){let S0=float(E('frac').value);
 if(check(S0)){S=S0;fs1=fs.replace('vec2(11,11)',S);updateShader()}
