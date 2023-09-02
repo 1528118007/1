@@ -14,10 +14,11 @@ Type:<select id='type'>
 <option value='0'>julia</option><option value='1'>mandelbrot</option>
 </select>
 Start value:<select id='type1'>
-<option value='0'>z_0</option><option value='2'>z_0+c</option></select>
+<option value='0'>z_0</option><option value='2'>z_0+c</option></select><button onclick='reset()'>refresh</button>
 <br>
 Mode:<select id="mode"><option value='0'>divergent</option><option value='1'>convergent</option></select>
 Fractal formula:<input type='text' id='frac' value='sqr(z)+c'><br>
+Palette formula:<input type='text' id='color' value='1-x,1-x,1-x'><br>
 Inversion:<select id='inv'>
 <option value='0'>normal</option><option value='1'>inverted</option>
 </select>
@@ -26,27 +27,30 @@ functions:mult for complex number multiplication,rec for 1/x,div for x/y<br>
 i is imaginary unit,k is real unit<br>
 built-in functions:Sin,Cos,Tan,Exp,Pow,Sqrt<br>
 c is the constant,R is relation number,zold is last iteration point<br>
-Julia set:z2+c<br>Nova fractal:2*z/3+rec(z2)/3+c<br>
-Burning ship fractal:vec2(u*u-v*v,2*abs(u*v))-c<br>
+Julia set:z2+c&emsp;&emsp;Nova fractal:2*z/3+rec(z2)/3+c<br>
+Burning ship fractal:vec2(u*u-v*v,2*abs(u*v))-c&emsp;&emsp;
 Lambda fractal:mult(c,z-z2)<br>Phoenix fractal:z2+c+mult(zold,R)<br>
-Buffalo fractal:vec2(u*u-v*v-abs(u),2*abs(u*v)-abs(v))-c<br>
+Buffalo fractal:vec2(u*u-v*v-abs(u),2*abs(u*v)-abs(v))-c&emsp;&emsp;
 Mandelbar:conj(z2)+c<br>
-Magnet frac 1:sqr(div(z2+c-k,2*z+c-2*k))<br>
+Magnet frac 1:sqr(div(z2+c-k,2*z+c-2*k))&emsp;&emsp;
 Magnet frac 2:sqr(k+div(cbr(z-k),sqr(c)+3*mult(z-k,z+c-k)))<br>
-Barnsley frac 1:mult(c,z-sign(u)*k)<br>
+Barnsley frac 1:mult(c,z-sign(u)*k)&emsp;&emsp;
 Barnsley frac 2:mult(c,z-k*sign(u*n+v*m))<br>
-Barnsley frac 3:z2-k+c*min(0,u)<br>
+Barnsley frac 3:z2-k+c*min(0,u)&emsp;&emsp;
 Relaxed nova:mult(z,k-R/3)+mult(R/3,rec(z2))+c<br>
 z^n-1 nova:mult(z,k-rec(R))+div(rec(z2),R)+c<br>
 ------More awesome fractals------<br>
-Orbit boost julia:sqr(M(z)&lt;0.5?2*z:z)+c<br>
+Orbit boost julia:sqr(M(z)&lt;0.5?2*z:z)+c&emsp;&emsp;
 type 2 phoenix:z2+n*zold+m*k<br>
-Chaosbrot:c+k*(u*u-v*v)+u*v*R<br>
+Chaosbrot:c+k*(u*u-v*v)+u*v*R&emsp;&emsp;
 Celtic z^2:z2-2*min(0,u*u-v*v)*k-c<br>
-Mitch's mandel:mult(c,z2+rec(z2))<br>
+Mitch's mandel:mult(c,z2+rec(z2))&emsp;&emsp;
 frothy basin(4th order):sqr(z2)-mult(c,conj(z))<br>
-Szegedi butterfly 1:vec2(v*v-sqrt(abs(u)),u*u-sqrt(abs(v)))+c<br>
-Szegedi butterfly 2:vec2(u*u-sqrt(abs(v)),v*v-sqrt(abs(u)))+c
+Szegedi butterfly 1:vec2(v*v-sqrt(abs(u)),u*u-sqrt(abs(v)))+c&emsp;&emsp;
+Sz. butterfly 2:vec2(u*u-sqrt(abs(v)),v*v-sqrt(abs(u)))+c<br>
+------Awesome palettes------
+type1:1-x,1-x,1-x&emsp;&emsp;type2:sin(x),sin(x),cos(x)&emsp;&emsp;type 3:x*x,x*x,x<br>
+type 4:3*x-1,1-abs(3*x-2),1-abs(x*1.5-0.5)
 <script id='v' type='x-shader/x-vertex'>
 attribute vec4 a;
 void main(){gl_Position=vec4(a);gl_PointSize=1.0;}
@@ -58,10 +62,11 @@ precision highp float;
 #endif
 uniform vec2 ce;uniform vec2 s;uniform float mode;uniform float type;
 uniform float id;uniform float inverted;uniform vec2 R1;
+uniform vec2 zc;uniform float zr;
 float I=0.0;
 vec2 i=vec2(0,1);vec2 k=vec2(1,0);
 float es=64.0;float r=min(ce.x,ce.y)*0.5;
-vec2 R=2.0*(R1-ce)/r;
+vec2 R=(R1-ce)/r;
 float A=0.0;float B=-1.0;
 vec2 L(){float x=sqrt(abs(A*A+4.0*B));
 if(A*A+4.0*B<0.0){return vec2(A/2.0,x/2.0);}else{return vec2((A+x)/2.0,0.0);}}
@@ -102,10 +107,12 @@ float d=0.0;
 //main function
 vec2 f(vec2 z,vec2 c){return vec2(11,11);}
 
+vec4 color(float x){return vec4(0.0);}
 
 void main(){
 vec2 fr=vec2(gl_FragCoord);
-vec2 cpre=(s-ce)/r;vec2 zpre=(fr-ce)/r;
+vec2 cpre=(s-ce)/r;vec2 zpre1=(fr-ce)/r;vec2 zcenter=(zc-ce)/r;
+vec2 zpre=((zr-1.0)*zcenter+zpre1)/zr;
 vec2 z;vec2 C;
 if(inverted==1.0){zpre=rec(zpre);}
 if(type==0.0){z=zpre;C=cpre;}else if(type==1.0){z=cpre;C=zpre;}else if(type==2.0){z=zpre;C=cpre+zpre;}else{z=zpre+cpre;C=zpre;}
@@ -120,8 +127,8 @@ break;
 }
 }
 if(I==100.0){gl_FragColor=vec4(0.0,0.0,0.0,1.0);}else{
-I=(sqrt(I-(mode==0.0?d:0.0)))/10.0;
-gl_FragColor=vec4(3.0*I-1.0,1.0-abs(I*3.0-2.0),1.0-abs(I*1.5-0.5),1);}
+I=sqrt(I)/10.0;
+gl_FragColor=color(I);}
 }
 </script>
 
@@ -130,7 +137,8 @@ gl_FragColor=vec4(3.0*I-1.0,1.0-abs(I*3.0-2.0),1.0-abs(I*1.5-0.5),1);}
 var E=(x)=>document.getElementById(x)
 var ca=E('c');gl=ca.getContext('webgl')
 var vs=E('v').innerText;fs=E('f').innerText
-var S='sqr(z)+c';fs1=fs.replace('vec2(11,11)',S)
+var S='sqr(z)+c';Sc='1.0-x,1.0-x,1.0-x'
+fs1=fs.replace('vec2(11,11)',S).replace('vec4(0.0)','vec4('+Sc+',1.0)')
 var p=gl.createProgram()
 var V=gl.createShader(gl.VERTEX_SHADER)
 var F=gl.createShader(gl.FRAGMENT_SHADER)
@@ -162,7 +170,8 @@ var w=window.innerWidth;h=window.innerHeight
 ca.width=w;ca.height=h
 var id=0
 var inverted=0
-
+var ce={x:w/2,y:h/2}
+var rr=Math.min(ce.x,ce.y)*0.5
 var b=gl.createBuffer()
 var ab=gl.ARRAY_BUFFER
 gl.bindBuffer(ab,b);gl.bufferData(ab,vtc,gl.STATIC_DRAW)
@@ -172,15 +181,19 @@ gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
 var c=gl.getUniformLocation(p,'ce');gl.uniform2fv(c,[w/2,h/2])//center
 var s=gl.getUniformLocation(p,'s');gl.uniform2fv(s,[w/2,h/2])
 var R=gl.getUniformLocation(p,'R1');gl.uniform2fv(R,[w/2+h/8,h/2])
+var Zc=gl.getUniformLocation(p,'zc');gl.uniform2fv(Zc,[w/2,h/2])
+var Zr=gl.getUniformLocation(p,'zr');gl.uniform1f(Zr,1)
 var mode=gl.getUniformLocation(p,'mode')
 var type=gl.getUniformLocation(p,'type')
 var inv=gl.getUniformLocation(p,'inverted')
 var Id=gl.getUniformLocation(p,'id')
 function update(){
-gl.uniform1f(mode,Mode);gl.uniform1f(type,Type+Type1);gl.uniform1f(Id,id);gl.uniform1f(inv,inverted);
+gl.uniform1f(mode,Mode);gl.uniform1f(type,Type+Type1);gl.uniform1f(Id,id);gl.uniform1f(inv,inverted);gl.uniform2f(Zc,zc.x,zc.y);gl.uniform1f(Zr,zr)
 }
 var seed={x:w/2,y:h/2}
 var rel={x:w/2+h/8,y:h/2}
+var zc={x:w/2,y:h/2}
+var zr=1
 var adjt=0
 function split(x){let t=[];st=true;
 let x1=Rep(x,['z2','z3','u','v','m','n'],['sqr(z)','cbr(z)','z.x','z.y','c.x','c.y'])
@@ -194,20 +207,29 @@ t.push(y);st=true
 function float(x){var t='';y=split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});return t.replace(/vec2.0/g,'vec2')}
 ca.onmousemove=(event)=>{var event=event||window.event;
 var x=event.offsetX;y=event.offsetY;
-if(!adjt){seed.x=x;seed.y=y}else{rel.x=x;rel.y=y}
+if(!adjt){seed.x=x;seed.y=y}else if(adjt==1){rel.x=x;rel.y=y}
 render()}
 function render(){
 gl.viewport(0,0,w,h)
 if(!adjt){
 gl.uniform2f(s,seed.x,seed.y)
-}else{
+}else if(adjt==1){
 gl.uniform2f(R,rel.x,rel.y)
 }
 gl.drawArrays(gl.TRIANGLES,0,6)
 }
 render()
-function check(x){let S1=x;shader=gl.createShader(gl.FRAGMENT_SHADER)
-gl.shaderSource(shader,fs.replace('vec2(11,11)',S1));gl.compileShader(shader);return gl.getShaderInfoLog(shader).length==0}
+var mix=(x,y,t)=>x+t*(y-x)
+function updatez(ox,oy,t){
+zc.x=(t*(1-zr)*zc.x+(1-t)*ox)/(1-zr*t);
+zc.y=(t*(1-zr)*zc.y+(1-t)*oy)/(1-zr*t);
+zr*=t;
+}
+function checkerror(x){let S1=x;shader=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(shader,fs.replace('vec2(11,11)',S1));gl.compileShader(shader);return gl.getShaderInfoLog(shader)}
+var check=(x)=>checkerror(x).length==0
+function checkc(x){let S1=x;shader=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(shader,fs.replace('vec3(0.0)',S1));gl.compileShader(shader);return gl.getShaderInfoLog(shader).length==0}
 function updateShader(){gl.shaderSource(F,fs1);gl.compileShader(F);gl.linkProgram(p)
 a=gl.getAttribLocation(p,'a')
 gl.enableVertexAttribArray(a)
@@ -215,6 +237,8 @@ gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
 c=gl.getUniformLocation(p,'ce');gl.uniform2fv(c,[w/2,h/2])
 s=gl.getUniformLocation(p,'s');gl.uniform2fv(s,[w/2,h/2])
 R=gl.getUniformLocation(p,'R1');gl.uniform2fv(R,[w/2+h/8,h/2])
+Zc=gl.getUniformLocation(p,'zc');gl.uniform2fv(Zc,[w/2,h/2])
+Zr=gl.getUniformLocation(p,'zr');gl.uniform1f(Zr,1)
 mode=gl.getUniformLocation(p,'mode')
 type=gl.getUniformLocation(p,'type')
 inv=gl.getUniformLocation(p,'inverted')}
@@ -224,12 +248,20 @@ E('type').onchange=function(){Type=value('type');update()}
 E('type1').onchange=function(){Type1=value('type1');update()}
 E('mode').onchange=function(){Mode=value('mode');update()}
 E('frac').onchange=function(){let S0=float(E('frac').value);
-if(check(S0)){S=S0;fs1=fs.replace('vec2(11,11)',S);updateShader()}
+if(check(S0)){S=S0;fs1=fs.replace('vec2(11,11)',S).replace('vec4(0.0)','vec4('+Sc+',1.0)');updateShader()}
+update()}
+E('color').onchange=function(){let S0=float(E('color').value);
+if(checkc('vec4('+S0+',1.0)')){Sc=S0;fs1=fs.replace('vec4(0.0)','vec4('+Sc+',1.0)').replace('vec2(11,11)',S);updateShader()}
 update()}
 E('inv').onchange=function(){inverted=value('inv');update()}
-ca.onclick=function(){adjt=1-adjt;E('adjt').innerHTML='Adjust type:'+['constant','relation number'][adjt]}
+ca.onclick=function(){adjt=(1+adjt)%3;E('adjt').innerHTML='Adjust type:'+['constant','relation number','fixed'][adjt]}
 //debug
 function debug(){E('d').innerHTML='vertex shader:'+gl.getShaderInfoLog(V)+'<br>'+'fragment shader:'+gl.getShaderInfoLog(F)}
+//zoom
+ca.onmousewheel=function(event){var event=event||window.event
+if (event.preventDefault) event.preventDefault()
+updatez(event.offsetX,event.offsetY,1-event.deltaY/1000);update();render()}
+function reset(){zc.x=w/2;zc.y=h/2;zr=1;update();render()}
 </script>
 </body>
 </html>
