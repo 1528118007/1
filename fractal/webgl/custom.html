@@ -14,7 +14,9 @@ Type:<select id='type'>
 <option value='0'>julia</option><option value='1'>mandelbrot</option>
 </select>
 Start value:<select id='type1'>
-<option value='0'>z_0</option><option value='2'>z_0+c</option></select><button onclick='reset()'>refresh</button>
+<option value='0'>z_0</option><option value='2'>z_0+c</option></select>
+<button onclick='refresh()'>refresh</button>
+<button onclick='seed={x:w/2,y:h/2};update();render()'>c=0</button>
 <br>
 Mode:<select id="mode"><option value='0'>divergent</option><option value='1'>convergent</option></select>
 Fractal formula:<input type='text' id='frac' value='sqr(z)+c'><br>
@@ -25,7 +27,7 @@ Inversion:<select id='inv'>
 <div id='adjt'>Adjust type:constant</div><br>
 functions:mult for complex number multiplication,rec for 1/x,div for x/y<br>
 i is imaginary unit,k is real unit<br>
-built-in functions:Sin,Cos,Tan,Exp,Pow,Sqrt<br>
+{} with comma is mult,with ; is div,without is rec<br>
 c is the constant,R is relation number,zold is last iteration point<br>
 Julia set:z2+c&emsp;&emsp;Nova fractal:2*z/3+rec(z2)/3+c<br>
 Burning ship fractal:vec2(u*u-v*v,2*abs(u*v))-c&emsp;&emsp;
@@ -111,8 +113,8 @@ vec4 color(float x){return vec4(0.0);}
 
 void main(){
 vec2 fr=vec2(gl_FragCoord);
-vec2 cpre=(s-ce)/r;vec2 zpre1=(fr-ce)/r;vec2 zcenter=(zc-ce)/r;
-vec2 zpre=((zr-1.0)*zcenter+zpre1)/zr;
+vec2 cpre=(s-ce)/r;vec2 zpre1=(fr-ce)/r;vec2 zce=(zc-ce)/r;
+vec2 zpre=mix(zce,zpre1,1.0/zr);
 vec2 z;vec2 C;
 if(inverted==1.0){zpre=rec(zpre);}
 if(type==0.0){z=zpre;C=cpre;}else if(type==1.0){z=cpre;C=zpre;}else if(type==2.0){z=zpre;C=cpre+zpre;}else{z=zpre+cpre;C=zpre;}
@@ -123,6 +125,7 @@ zold=z;
 z=z1;
 }else{
 d=loga(loga(M(z-zold)));
+if(mode==0.0){I-=d;}
 break;
 }
 }
@@ -189,6 +192,7 @@ var inv=gl.getUniformLocation(p,'inverted')
 var Id=gl.getUniformLocation(p,'id')
 function update(){
 gl.uniform1f(mode,Mode);gl.uniform1f(type,Type+Type1);gl.uniform1f(Id,id);gl.uniform1f(inv,inverted);gl.uniform2f(Zc,zc.x,zc.y);gl.uniform1f(Zr,zr)
+gl.uniform2f(s,seed.x,seed.y)
 }
 var seed={x:w/2,y:h/2}
 var rel={x:w/2+h/8,y:h/2}
@@ -196,7 +200,7 @@ var zc={x:w/2,y:h/2}
 var zr=1
 var adjt=0
 function split(x){let t=[];st=true;
-let x1=Rep(x,['z2','z3','u','v','m','n'],['sqr(z)','cbr(z)','z.x','z.y','c.x','c.y'])
+let x1=Rep(x,['z2','z3','u','v','m','n','d','a'],['sqr(z)','cbr(z)','z.x','z.y','c.x','c.y','M(z-zold)','atan(z.y,z.x)'])
 let y='';for(let i=0;i<x1.length;i++){
 y=x1.charAt(i);if((y=='.'&&!st)||(parseFloat(y)==0||parseFloat(y))){
 if(st){t.push(y);st=false}else{t[t.length-1]+=y}
@@ -204,7 +208,27 @@ if(st){t.push(y);st=false}else{t[t.length-1]+=y}
 t.push(y);st=true
 }
 };return t}
-function float(x){var t='';y=split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});return t.replace(/vec2.0/g,'vec2')}
+var spl=(x)=>x.split('')
+function modify(x,t){let y=spl(x.slice(t));hs=false;z=0;d=-1;
+for(let i=0;i<y.length;i++){
+if('{[('.indexOf(y[i])>=0){d++}
+else if('}])'.indexOf(y[i])>=0){d--}
+if(!d){
+if(y[i]==','){hs=true;y[i]='α'}else if(y[i]==';'){hs=true;y[i]='β'}
+}
+if(d<0){z=i;break}
+}
+if(!hs){y=y.filter((x1,y1)=>y1<z+1);y[0]='rec(';y[z]=')';y=y.join('')}else{
+y=y.filter((x1,y1)=>y1&&y1<z)
+y=y.join('').replace(/α/g,'αγ').replace(/β/g,'βδ').replace(/β/g,'α').split('α')
+y=y.reduce((x1,y1)=>y1[0]=='γ'?'mult('+x1+','+y1.slice(1)+')':(y1[0]=='δ'?'div('+x1+','+y1.slice(1)+')':x1+y1))}
+return x.slice(0,Math.max(t,0)).concat(y,x.slice(z+1+t))}
+var Modify=(x)=>modify(x,x.indexOf('{'))
+function Mod1(x,i){return i<1?x:Modify(Mod1(x,i-1))}
+function getN(x,str){return x.split('').filter((y)=>y==str).length}
+var Mod=(x)=>Mod1(x,getN(x,'{'))
+
+function float(x){var t='';y=split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});t=t.replace(/vec2.0/g,'vec2').replace(/\[/g,'vec2(').replace(/\]/g,')');return Mod(t)}
 ca.onmousemove=(event)=>{var event=event||window.event;
 var x=event.offsetX;y=event.offsetY;
 if(!adjt){seed.x=x;seed.y=y}else if(adjt==1){rel.x=x;rel.y=y}
@@ -225,9 +249,8 @@ zc.x=(t*(1-zr)*zc.x+(1-t)*ox)/(1-zr*t);
 zc.y=(t*(1-zr)*zc.y+(1-t)*oy)/(1-zr*t);
 zr*=t;
 }
-function checkerror(x){let S1=x;shader=gl.createShader(gl.FRAGMENT_SHADER)
-gl.shaderSource(shader,fs.replace('vec2(11,11)',S1));gl.compileShader(shader);return gl.getShaderInfoLog(shader)}
-var check=(x)=>checkerror(x).length==0
+function check(x){let S1=x;shader=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(shader,fs.replace('vec2(11,11)',S1));gl.compileShader(shader);return gl.getShaderInfoLog(shader).length==0}
 function checkc(x){let S1=x;shader=gl.createShader(gl.FRAGMENT_SHADER)
 gl.shaderSource(shader,fs.replace('vec3(0.0)',S1));gl.compileShader(shader);return gl.getShaderInfoLog(shader).length==0}
 function updateShader(){gl.shaderSource(F,fs1);gl.compileShader(F);gl.linkProgram(p)
@@ -235,10 +258,10 @@ a=gl.getAttribLocation(p,'a')
 gl.enableVertexAttribArray(a)
 gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)
 c=gl.getUniformLocation(p,'ce');gl.uniform2fv(c,[w/2,h/2])
-s=gl.getUniformLocation(p,'s');gl.uniform2fv(s,[w/2,h/2])
-R=gl.getUniformLocation(p,'R1');gl.uniform2fv(R,[w/2+h/8,h/2])
-Zc=gl.getUniformLocation(p,'zc');gl.uniform2fv(Zc,[w/2,h/2])
-Zr=gl.getUniformLocation(p,'zr');gl.uniform1f(Zr,1)
+s=gl.getUniformLocation(p,'s');gl.uniform2fv(s,[seed.x,seed.y])
+R=gl.getUniformLocation(p,'R1');gl.uniform2fv(R,[rel.x,rel.y])
+Zc=gl.getUniformLocation(p,'zc');gl.uniform2fv(Zc,[zc.x,zc.y])
+Zr=gl.getUniformLocation(p,'zr');gl.uniform1f(Zr,zr)
 mode=gl.getUniformLocation(p,'mode')
 type=gl.getUniformLocation(p,'type')
 inv=gl.getUniformLocation(p,'inverted')}
@@ -261,7 +284,7 @@ function debug(){E('d').innerHTML='vertex shader:'+gl.getShaderInfoLog(V)+'<br>'
 ca.onmousewheel=function(event){var event=event||window.event
 if (event.preventDefault) event.preventDefault()
 updatez(event.offsetX,event.offsetY,1-event.deltaY/1000);update();render()}
-function reset(){zc.x=w/2;zc.y=h/2;zr=1;update();render()}
+function refresh(){zr=1;zc={x:w/2,y:h/2};update();render()}
 </script>
 </body>
 </html>
