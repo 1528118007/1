@@ -7,6 +7,7 @@
 //variables
 var cast=1
 var pla1=1
+var a=0
 var S1=[1];stage=0;S2=[7,8,9,10,11,12,13,14,15,16]
 var S3=[3];S4=[1,2,5,6,7,8,9,10,11]
 var S5=[1,2,4];S6=[1,2,3,4]
@@ -19,11 +20,17 @@ var S17=[1,2,3,4,6,7,11,14];S18=[1,2,3,4,5,6,7,8,9,10]
 var S19=[1,2,3,4,5,6,7,8,9,10,16,17,18,21];S20=[1,2,3,4,5,6,8,12,20,23,24,26]
 var S21=[1,2,5,6,7,8,9,10,11,12,14,15,18];S22=[1,4,5,6]
 var S23=[1,3,4,6,8,10];S24=[1,2,3,5,6,7,8,9]
-var Sta=[S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24];
+var S25=[1,2,3,4,5,6,7,8];S26=[1,2,3,4,5,6]
+var S27=[1,2,3,4,6,9];S28=[1,2,3,4,5,6,7,8,17]
+var S29=[1,2,4,5,8,9,10,15];S30=[1,2,4,5]
+var S31=[1,2,3,6,7,8,9,10];S32=[1,2,3,6,7,9,11,13,15,17,19,21,23,25]
+var S33=[1,3,4,5];S34=[1,2,3,4,5,6,7,8,9,10,11]
+var S35=[1,4,5,8,9,10,11,12];S36=[1,3,5,6,8,9,10,11,12]
+var Sta=[S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31,S32,S33,S34,S35,S36];
 function obj(){return Sta[stage]}
 
 //tracks
-var Ti=[1,1,1,1,1,1,1,1,0,0,0,5,1,1,0,1,0,0,0,1,10,2,0,5]
+var Ti=[1,1,1,1,1,1,1,1,0,0,0,5,1,1,0,1,0,0,0,1,10,2,0,5,1,0,0,0,2,1,0,1,0.6,1,1,1]
 var T0=[[-10,0],[9,0]];T9=[[-8,-8],[-8,8],[8,8],[8,-8]]
 var T10=[[-6,-6],[-6,6],[6,6],[6,-6],[-5,-6],[-5,5],[5,5],[5,-5],[-4,-5],[-4,4],[4,4],[4,-4],[-3,-4],[-3,3],[3,3],[3,-3],[-2,-3],[-2,2],[2,2],[2,-2],[-1,-2],[-1,1],[1,1],[1,-1],[0,-1],[0,0]]
 var T11=[[-9,-9],[-9,9],[9,9],[9,-9],[-6,-9],[-6,6],[6,6],[6,-6]]
@@ -35,7 +42,12 @@ var T19=[[-8,6],[6,6],[6,-6],[-6,-6]]
 var T21=[[0,0],[0,8],[-8,8],[-8,-8],[8,-8],[8,8],[0,8],[0,-10]]
 var T22=[[-10,8],[8,8],[8,-8],[-8,-8],[-8,7]]
 var T23=[[-7,-7],[-5,-7],[-5,-5],[-3,-5],[-3,-3],[-1,-3],[-1,-1],[1,-1],[1,1],[3,1],[3,3],[5,3],[5,5],[7,5],[7,7]]
-var Tr=[T0,T0,T0,T0,T0,T0,T0,T0,T9,T10,T11,T12,T0,T0,T15,T0,T17,T18,T19,T0,T21,T22,T23,T12]
+var T28=[[-8,0],[8,0]]
+var T281=[[-8,0],[9,0]];T29=[[-10,0],[8,0]]
+var T31=[[-9,-8],[-3,-8],[-3,0],[3,0],[3,8],[9,8]]
+var T33=[[-9.4,0],[8,0],[-9.8,0]]
+var T36=[[-10,0],[1.2,0],[1.2,-5.1],[9,-5.1],[9,0]]
+var Tr=[T0,T0,T0,T0,T0,T0,T0,T0,T9,T10,T11,T12,T0,T0,T15,T0,T17,T18,T19,T0,T21,T22,T23,T12,T0,T28,T28,T281,T29,T0,T31,T0,T33,T33,T0,T36]
 var Trc=()=>Tr[stage];Tic=()=>Ti[stage];Tc=()=>circ(['p'].concat(Trc()))
 
 var isNum=(x)=>typeof(x)=='number'||typeof(x)=='undefined'
@@ -44,6 +56,8 @@ var cos=(x)=>Math.cos(x)
 var min=(x,y)=>Math.min(x,y)
 var max=(x,y)=>Math.max(x,y)
 var abs=(x)=>Math.abs(x)
+var sqrt=(x)=>Math.sqrt(x)
+var dot=(x,y)=>x[0]*y[0]+x[1]*y[1]
 var toList=(x)=>isNum(x)?[x]:x
 var add=(x,y)=>{if(isNum(x)&&isNum(y)){return x+y}else{var x1=toList(x).length;y1=toList(y).length;return list(0,1,max(x1,y1)).map((i0)=>add(toList(x)[min(i0,x1-1)],toList(y)[min(i0,y1-1)]))}}
 var un=(x)=>x!=undefined?x:[]
@@ -80,52 +94,41 @@ var excf=(x)=>Array.from(x).slice(1)
 var ins=(x,y)=>isp(y)?insp(x,excf(y)):insc(x,excf(y))
 function cir(x,y){ctx.beginPath();ctx.arc(tr(x[0]),tr(-x[1]),max(0,y)*w/20,0,2*pi);ctx.fill()}
 //ray casting method
-var solve=(x1,x2,x3,y1,y2,y3)=>mult([x3*y2-x2*y3,x1*y3-x3*y1],1/(x1*y2-x2*y1))
-var int1=(x,y)=>solve(x[0],x[1],x[2],y[0],y[1],y[2])
-var mean=(x)=>{var y=[0,0];for(let j=0;j<L(x);j++){y[0]+=x[j][0];y[1]+=x[j][1]};y[0]/=L(x);y[1]/=L(x);return y}
-var con=(x,y)=>[y[1]-x[1],x[0]-y[0],x[0]*y[1]-x[1]*y[0]]
-var int2=(x,y)=>int1(con(x[0],x[1]),con(y[0],y[1]))
-var inset=(x,y,t)=>abs(t-(x+y)/2)<abs(x-y)/2||x==y
-var sgn=(x)=>!x?0:(x>0?1:-1)
-var otset=(x,y,t)=>(t-x)*(y-x)>0||x==y
-var inseg=(x,y,t)=>inset(x[0],y[0],t[0])&&inset(x[1],y[1],t[1])
-var inset1=(x,y,t)=>abs(t-(x+y)/2)<=abs(x-y)/2||x==y
-var inseg1=(x,y,t)=>inset1(x[0],y[0],t[0])&&inset1(x[1],y[1],t[1])
-var otseg=(x,y,t)=>otset(x[0],y[0],t[0])&&otset(x[1],y[1],t[1])
+var al=(x,y)=>[x[0]+y[0],x[1]+y[1]]
+var sl=(x,y)=>[x[0]-y[0],x[1]-y[1]]
+var inset=(x,y,t)=>abs(t-(x+y)/2)<abs(x-y)/2
 var inf=Infinity
 var Deg=(x,y,t)=>abs(deg(x,y,t))
 var arg=(x,y)=>mod(D(x,y),2*pi)
 var indeg=(x,y,t)=>abs(min(Deg(x,pla(),y)-Deg(x,pla(),t)-Deg(y,pla(),t),Deg(x,t,y)-Deg(x,t,pla())-Deg(y,t,pla())))<1e-5
-var isint=(x,y,t)=>inseg(y[0],y[1],t)&&otseg(x[0],x[1],t)
-var isints=(x,y)=>inseg1(y[0],y[1],int2(x,y))&&inseg1(x[0],x[1],int2(x,y))
-var lerp=(x,y,t)=>add(x,mult(subt(y,x),t))
+
+var lerp=(x,y,t)=>[0,1].map((i)=>x[i]+t*(y[i]-x[i]))
+var end=(x,y)=>[lerp(pla(),x,30/sqrt(Di(pla(),x)**2-(dot(sl(y,x),sl(pla(),x))/Di(x,y))**2))]
+var mean=(x)=>mult(x.reduce((y,z)=>al(y,z)),1/L(x))
 var tg1=(x,y,r,z)=>{if(r>Di(x,y)){return [inf,0]}else{return add(y,mult(rot(subt(x,y),z*Math.acos(r/Di(x,y))),r/Di(x,y)))}}
 var tg=(x,y,r)=>[tg1(x,y,r,1),tg1(x,y,r,-1)]
-var vtx1=(x)=>isp(x)?excf(x):tg(pla(),x[1],un(x[2])[0])
-var seg=(x,i)=>[x[mod(i,L(x))],x[(i+1)%L(x)]]
-var Seg=(x,i)=>int3s(seg(x,i),border).sort((y,z)=>y[0]-z[0])[0]
-var iv=(x)=>max(abs(x[0]),abs(x[1]))<=10
-var modify=(x,i,y)=>x.filter((y,z)=>z<i).concat(y,x.filter((y,z)=>z>i))
-function cut(x){var t=x;for(let i=0;i<L(x);i++){
-if(!iv(x[i])){var x1=[];y1=[];
-if(iv(x[mod(i-1,L(x))])){x1=[Seg(x,i-1)]};if(iv(x[(i+1)%L(x)])){y1=[Seg(x,i+1)]};
-t=modify(t,i,x1.concat(y1))}
-};return t}
-var vtx=(x)=>cut(vtx1(x))
-function int3s(x,y){var z=vtx1(y);t=[];for(let i=0;i<L(z);i++){var x1=[z[i],z[(i+1)%L(z)]];if(isints(x,x1)){t[i]=int2(x,x1)}else{t[i]=[inf,0]}};return t}
-var isInts=(x,y)=>int3s(x,y).map((z)=>z[0]).concat([inf]).reduce((x1,y1)=>x1<y1?x1:y1)<inf
-function int3(x,y,j,b){var z=vtx(y);t=[];for(let i=0;i<L(z);i++){var x1=[z[i],z[(i+1)%L(z)]];if(isint(x,x1,int2(x,x1))&&(b||(i!=j&&i!=mod(j-1,L(z))))){t=t.concat([int2(x,x1)])}else{t=t.concat([[inf,0]])}};return t}
-function int40(x,i){return int3([pla(),vtx(x)[i]],x,i,false).concat(int3([pla(),vtx(x)[i]],border,-1,true)).filter((t1)=>t1[0]<inf).sort((x1,y1)=>Di(pla(),x1)-Di(pla(),y1))[0]}
-function int4(x,i){var z=vtx(x);
-if(!L(int40(x,i))){return []}else{if(inseg(pla(),z[i],int40(x,i))){return []}else if(indeg(z[mod(i-1,L(z))],z[(i+1)%L(z)],z[i])){return [z[i]]}else{return [z[i],int40(x,i)]}}}
-function int5(x){var t=[];for(let i2=0;i2<L(vtx(x));i2++){t=t.concat(int4(x,i2))};return t}
-function int6(x,y){var t=[];for(let i4=0;i4<4;i4++){if(isInts([pla(),y[i4+1]],x)){t=t.concat([y[i4+1]])}};return t}
+var vtx=(x)=>isp(x)?excf(x):tg(pla(),x[1],un(x[2])[0])
+var V=(x,i)=>vtx(x)[mod(i,L(x)-1)]
+var seg=(x,t)=>[V(x,t),V(x,t+1)]
+var sq1=(x)=>max(abs(x[0]),abs(x[1]));iv=(x)=>min(sq1(x[0]),sq1(x[1]))<10
+var sol=(x1,x2,x3,y1,y2,y3)=>x1*y2==y1*x2?[-1,-1]:mult([x3*y2-x2*y3,x1*y3-x3*y1],1/(x1*y2-x2*y1))
+var int=(x,y)=>sol(x[1][0],-y[1][0],y[0][0]-x[0][0],x[1][1],-y[1][1],y[0][1]-x[0][1])
+var isInt=(x)=>x[0]>0&&x[1]>0&&x[1]<1&&x[0]<1
+var int1=(x,y)=>isInt(int(x,y))?int(x,y)[0]:100
+var intr=(x,y)=>int1([x[0],sl(x[1],x[0])],[y[0],sl(y[1],y[0])])
+function int2(x,p,j){for(let i1=0;i1<L(p)-1;i1++){if(intr(x,seg(p,i1))<100&&i1!=mod(j-1,L(p)-1)&&i1!=mod(j,L(p)-1)){return true}};return false}
+function int20(x,p,j){let t=100;for(let i=0;i<L(p)-1;i++){let z=intr(x,seg(p,i));if(z<t&&i!=mod(j-1,L(p)-1)&&i!=mod(j,L(p)-1)){t=z}};return t}
+var int3=(i,p,p1)=>int20([pla(),p1[i]],p,i)
+var int4=(x,y,i)=>lerp(pla(),y[i],int3(i,x,y))
 var Dir=(x)=>x.map((y)=>norm(D(mean(x),y)))
-var Dis=(x)=>x.map((y)=>norm(Di(pla(),y)))
-var sdir=(x)=>list(0,1,L(x)).sort((x1,x2)=>{if(Dir(x)[x1]==Dir(x)[x2]){return Dis(x)[x1]-Dis(x)[x2]}else{return Dir(x)[x1]-Dir(x)[x2]}}).map((y)=>x[y])
-var intr=(x)=>int5(x).concat(int6(x,border))
-var shade=(x)=>sdir(intr(x))
-function light(x){x.forEach((y)=>{poly(shade(y))})}
+var sdir=(x)=>list(0,1,L(x)).sort((x1,x2)=>{return Dir(x)[x1]-Dir(x)[x2]}).map((y)=>x[y])
+function sh(x){poly(x.concat(end(x[1],x[0]),end(x[0],x[1])))}
+var isind=(x,i)=>!int2([pla(),(x)[i]],x,mod(i,L(x)))
+var isInd=(x,i)=>!isind(x,i)&&!indeg(V(x,i-1),V(x,i+1),V(x))
+function IsInd(x,i){let x1=isind(x,i);x2=isInd(x,i);y1=isind(x,i+1);y2=isInd(x,i+1);return (x1&&y1)||(x1&&y2)||(x2&&y1)}
+function Sh(x,i){if(iv(seg(x,i))&&IsInd(x,i)){sh(seg(x,i))}}
+function light(x){x.forEach((p)=>{for(let i=0;i<L(p)-1;i++){Sh(p,i)}})}
+
 //executing system
 function rot(x,t){return [x[0]*cos(t)-x[1]*sin(t),x[0]*sin(t)+x[1]*cos(t)]}
 var addtr=(t,x)=>isp(t)?[t[0]].concat(add(excf(t),clone(x,L(t)-1))):[t[0],add(x,t[1]),t[2]]
@@ -136,9 +139,9 @@ var Circ=(x)=>circ(x)+Di(x[1],x[L(x)-1])
 function intp(x,t){var t1=t;for(let i3=0;i3<=L(x);i3++){var x4=x[i3];x5=x[(i3+1)%L(x)];y=Di(x4,x5);if(t1<y){return lerp(x4,x5,t1/y)}else{t1-=y}}}
 var intpc=(x,t)=>add(x[0],rot([x[1][0],0],x[1][1]*t))
 var Intp=(x,t)=>isp(x)?intp(excf(x),max(0,t)):intpc(excf(x),t)
-var init=(x,t,i)=>{return [i,x[5],x[6]>=4?(xAtp(Intp(x[4],max(0,x[5])))+x[6]-4):x[6],1,un(x[7])[0]>0?un(x[7])[2]:inf,un(x[1])[0]==2?un(x[1])[1]:(abs(x[1][0])==6?x[1][3]:inf),un(x[1])[0]==5?0:inf,0,0]}
+var init=(x,t,i)=>{return [i,x[5]=='p'?0:x[5],x[6]>=4?(xAtp(Intp(x[4],max(0,x[5])))+x[6]-4):x[6],1,un(x[7])[0]>0?un(x[7])[2]:inf,un(x[1])[0]==2?un(x[1])[1]:(abs(x[1][0])==6?x[1][3]:inf),un(x[1])[0]==5?0:inf,0,0]}
 function plotobj(x,h){var y=cvtx(x,h);y1=excf(y);if(isp(y)){poly(y1)}else{cir(y1[0],y1[1][0])}}
-var a=(x)=>max(0,x)
+var aa=(x)=>max(0,x)
 function xAtp(x){return deg([x[0]+1,x[1]],x,pla())}
 var v=4;dt=0.05;ps=0.2
 function getId(r,x){var i=-1;for(let i1=0;i1<L(r);i1++){if(r[i1][0]==x-1){i=i1;break}};return i}
@@ -152,25 +155,26 @@ case 2:h[1]=(h[1]+x1);break
 case 3:h[1]=mod(h[1]+x1,Circ(x[4]));break
 case 4:h[1]=max(0,min(h[1]+x1,circ(x[4])));break
 default:break}
-switch(un(x[7])[0]){case 1:if(h[4]>0){h[4]=a(h[4]-dt);h[3]+=x2};break
-case 2:if(h[4]>0){h[4]=a(h[4]-dt);h[2]=mod(h[2]+x2,2*pi)};break
-case 3:if(h[4]>0){h[4]=a(h[4]-dt);h[7]+=dt*x[7][1]};break
+switch(un(x[7])[0]){case 1:if(h[4]>0){h[4]=aa(h[4]-dt);h[3]+=x2};break
+case 2:if(h[4]>0){h[4]=aa(h[4]-dt);h[2]=mod(h[2]+x2,2*pi)};break
+case 3:if(h[4]>0){h[4]=aa(h[4]-dt);h[7]+=dt*x[7][1]};break
 default:break}
 switch(un(x[1])[0]){case 1:if((abs(pla1-x[1][1])<=ps&&L(x[1])==2)||(inset(x[1][1],x[1][2],pla1)&&L(x[1])==3)){h0=true;h2=x[2]>0};break
-case 2:if(h[5]>0){h[5]=a(h[5]-dt)}else{h0=true;h2=x[2]>0};break
+case 2:if(h[5]>0){h[5]=aa(h[5]-dt)}else{h0=true;h2=x[2]>0};break
 case 3:if(inset(x[1][1],x[1][2],y)){h0=true;h2=x[2]>0};break
 case 4:if(inset(x[1][3],x[1][4],y)&&inset(x[1][1],x[1][2],h[1])){h0=true;h2=x[2]>0};break
-case 5:if(h[6]>0){h[6]=a(h[6]-dt)}else{h1=true;h[6]=x[1][1]};break
-case 6:if(inset(x[1][1],x[1][2],pla1)){h0=true;h2=x[2]>0}else if(h[5]>0){h[5]=a(h[5]-dt)}else{if(x[2]>0){x0=d[max(0,L(x[1])<5?1:x[1][4]-1)];xnum=x[1][4];h0=true}};break
+case 5:if(h[6]>0){h[6]=aa(h[6]-dt)}else{h1=true;h[6]=x[1][1]};break
+case 6:if(inset(x[1][1],x[1][2],pla1)){h0=true;h2=x[2]>0}else if(h[5]>0){h[5]=aa(h[5]-dt)}else{if(x[2]>0){x0=d[max(0,L(x[1])<5?1:x[1][4]-1)];xnum=x[1][4];h0=true}};break
 case -1:if(inset(x[1][1]-h[1],x[1][2]-h[1],pla1)){h0=true;h2=x[2]>0};break
 default:break}
+if(x[5]=='p'){h[1]=pla1}
 r1=r1.filter((x3,y3)=>y3!=n)
-if(h0){if(x0[5]<0){x0[5]=x0[0]==1?0:h[1]};ii=init(x0,t,xnum);x01[5]=h[1];ii[2]=init(x01,t,xnum)[2];ii[8]=h[1]}
-if(h1){if(x0[5]<0){x0[5]=x0[0]==1?0:h[1]};ii=init(x0,t,xnum);x01[5]=h[1];ii[2]=init(x01,t,xnum)[2];ii[8]=h[1];
+if(h0){if(x0[5]<0){x0[5]=(x0[0]==1?h[8]:h[1])};ii=init(x0,t,xnum);x01[5]=h[1];ii[2]=init(x01,t,xnum)[2];ii[8]=(x[0]==1?h[8]:h[1]);if(x[9]){ii[1]=0}}
+if(h1){if(x0[5]<0){x0[5]=(x0[0]==1?h[8]:h[1])};ii=init(x0,t,xnum);x01[5]=h[1];ii[2]=init(x01,t,xnum)[2];ii[8]=(x[0]==1?h[8]:h[1]);
 r1=r1.concat([ii])};if(h2){r1[L(r1)]=h0?ii:h};return r1}
 
 var E2=(d,r,n,t)=>E1(d,r,n,r[n][0]-1,t)
-function E(){var k1=0;while(k1<L(St)){St=E2(cD(),St,0,pla());k1++}}
+function E(){var k1=0;while(k1<L(St)){St=E2(cD(),St,0,pla());k1++};a+=dt}
 function Init(d,t){var z=[];k0=0;for(let k=0;k<L(d);k++){if(inlist(k+1,obj())){z[k0]=init(d[k],t,k+1);k0++}};return z}
 function inlist(x,y){return un(y).filter((q)=>q==x).length>0}
 //stage design
@@ -178,8 +182,10 @@ function pla(){return intp(Trc(),pla1)};
 var dir=0
 function goal(){return intp(Trc(),Tc())}
 var cla=(x,y,t)=>min(y,max(x,t))
+var A27r=[0,0,0,0,0,0,0,0,0]
+var A32r=[0,0,0,0,0,0,0,0,0,0]
 var D1=()=>[[3,[0,0],1,['c',[0,0],[1,0]],['p',[0,5],[0,-5]],5,0,[0,0,0],10]]
-var Data=()=>[D1(),D2(),D3(),D4(),D5(),D6(),D7(),D8(),D9(),D10(),D11(),D12(),D13(),D14(),D15(),D16(),D17(),D18(),D19(),D20(),D21(),D22(),D23(),D24()]
+var Data=()=>[D1(),D2(),D3(),D4(),D5(),D6(),D7(),D8(),D9(),D10(),D11(),D12(),D13(),D14(),D15(),D16(),D17(),D18(),D19(),D20(),D21(),D22(),D23(),D24(),D25(),D26(),D27(),D28(),D29(),D30(),D31(),D32(),D33(),D34(),D35(),D36()]
 var St=Init(D1(),pla())
 var border=['p',[10,10],[10,-10],[-10,-10],[-10,10]]
 function plotObj(d,r){for(let k=0;k<L(r);k++){plotobj(d[r[k][0]-1],r[k])}}
@@ -197,7 +203,8 @@ function setcolor(x){ctx.fillStyle='rgb('+x+','+x+','+x+')'}
 var ls=200
 function raycast(){ctx.clearRect(0,0,400,400);if(cast==1){ctx.fillStyle='rgb('+ls+','+ls+','+ls+')';light(Light(cD(),St))}}
 plot(D1(),St)
-setInterval(game,1000*dt)
+id=setInterval(game,1000*dt)
+
 //actions
 function u1(){pla1=cla(0,Tc(),pla1+v*dt*dir)}
 var anim=0
@@ -205,7 +212,8 @@ function u2(){if(anim>0){anim=min(anim+dt,3)};if(anim==3){nextstage()}}
 function u31(){if(inset(0,1,anim)){ctx.strokeStyle='rgba(255,0,0,'+(1-anim)+')';sqS(pla(),anim)}}
 function u32(){if(inset(1,3,anim)){ctx.fillStyle='rgba(255,255,255,'+min(1,anim-1)+')';sq([0,0],10)}}
 var g=true
-function nextstage(){if(stage<L(Data())-1&&g){stage++;pla1=Tic();St=Init(cD(),pla());anim=0}else if(!g){pla1=Tic();St=Init(cD(),pla());g=true;anim=0}else if(stage>=L(Data())-1&&g){document.getElementById('div').innerHTML='you have passed all the levels'}}
+function wtf(){a=0;A27r=[rdm(0,2*pi),rdm(-7,3),rdm(-5,5),rdm(0,2*pi),rdm(-7,3),rdm(-5,5),rdm(0,2*pi),rdm(-7,3),rdm(-5,5)];for(let i=0;i<10;i++){A32r[i]=rdm(-7,7)}}
+function nextstage(){if(stage<L(Data())-1&&g){stage++;pla1=Tic();wtf();St=Init(cD(),pla());anim=0}else if(!g){pla1=Tic();wtf();St=Init(cD(),pla());g=true;anim=0}else if(stage>=L(Data())-1&&g){document.getElementById('div').innerHTML='you have passed all the levels'}}
 function cD(){return Data()[stage]}
 function rest(){g=false;anim=dt}
 function Ins(d,r,x){for(let k=0;k<L(r);k++){if(ins(x,cvtx(d[r[k][0]-1],r[k]))){return 1}}}
@@ -226,11 +234,12 @@ function plane(x){return ['p',[0,0],[-x,-x],[x,0],[-x,x]]}
 function gun(x){return ['p',[x,0],[0,x],[-x,0],[0,-x],[x,0],[-x/4,-x/2.4],[-x/4,x/2.4]]}
 function spike(x){return ['p',[0,x],[3*x,0],[0,-x]]}
 function alley(x1,y1,x,y,z){return ['p',[x1+x,y1-x],[x1+x,y1+x],[x1-x,y1+x],[x1-x,y1-x],[x1-y,y1-x],[x1-y,y1-x+z],[x1+y,y1-x+z],[x1+y,y1-x]]}
-var dm=['c',[0,0],[0,1]]
+var dm=['c',[0,0],[0,1]];var ds=Ci(1,11,11)
 //built in objects
 function static(x,i){return [0,[i[0],i[1]],i[2],x,dm,0,0,[0,0,0],0]}
 function Spin(x,y,t,z){return [0,[0,0],1,x,['c',y,[0,1]],0,0,[2,t,z],0]}
 function spin(x,y,t){return [0,[0,0],1,x,['c',y,[0,1]],0,0,[2,t,inf],0]}
+function spin1(x,y,t1,t,r){return [0,[0,0],1,addtr(x,[t1,0]),['c',y,[0,1]],0,r,[2,t,inf],0]}
 function swing(x,r,t){return [3,[0,0],1,x,['p',[0,0],[0,r]],0,0,[0,0,0],abs(2*r/t)]}
 function Swing(x,r,t){return [3,[0,0],1,x,['p',[0,0],[r,0]],0,0,[0,0,0],abs(2*r/t)]}
 function gate(x,t){return [4,[0,0],1,x,['p',[0,0],[0,t]],0,0,[0,0,0],abs(t)]}
@@ -238,6 +247,7 @@ function Gate(x,t){return [4,[0,0],1,x,['p',[0,0],[t,0]],0,0,[0,0,0],abs(t)]}
 function rotate(x,y,r,d,t){return [2,[0,0],1,x,['c',y,[r,1]],d,0,[0,0,0],2*pi/t]}
 function rail(x,y,r,t){return [1,[2,20],0,x,['p',y,add(y,[1,0])],-1,r,[0,0,0],t]}
 function gate1(x,t,r){return [4,[0,0],1,x,['p',[0,0],[0,r]],-1,0,[0,0,0],t]}
+function gate2(x,y,t,t1){return [4,[0,0],1,x,['p',[y,0],[y,t]],0,0,[0,0,0],abs(t/t1)]}
 function expand(x,i,y,t){return [0,[i[0],i[1]],i[2],multtr(x,0.01),Ci(0,y[0],y[1]),0,0,[1,99/t,t],0]}
 function dS(x){stage=x-1;nextstage()}
 
@@ -273,6 +283,33 @@ function D21(){return [static(rect(-5,10,-4,6),[1,11.8,3]),static(rect(5,10,4,6)
 function D22(){return [swing(['p',[-8,12.5],[-6,8.5],[-4,12.5],[-2,8.5],[0,12.5],[2,8.5],[4,12.5],[6,8.5],[8,12.5]],-2,1),[3,[2,1],3,ci(0.02),['p',[7,0],[9,0]],-1,0,[1,99,1],1.3],[3,[2,1],2,ci(2),['p',[7,0],[9,0]],-1,0,[1,-0.99,1],1.3],static(Ci(1,11,11),[2,0,2]),static(Ci(0.5,-9.5,-8),[5,2,7]),static(Ci(0.5,-9.5,-8),[5,2,8]),[2,[2,8],0,ci(0.4),Ci(1,-9.5,-8),0,0,[3,3,8],pi],[2,[2,8],0,ci(0.4),Ci(1,-9.5,-8),pi,0,[3,3,8],pi]]}
 function D23(){return [static(rect(-0.5,1,0.5,-3),[1,12.3,2]),gate(rect(-0.5,1,0.5,-3),-2.3),[0,[2,0],3,gun(0.6),Ci(0,-9.4,-9.4),0,4,[0,0,0],0],static(Ci(0,-9.4,-9.4),[5,2*Math.random(),5]),rail(spike(1/4),[-9.4,-9.4],4,4),[3,[5,2*Math.random()],7,ci(0.3),['p',[-7,-9],[7,-9]],0,0,[0,0,0],2],[1,[2,5],0,spike(1/4),['p',[-7,-9],[7,-9]],-1,pi/2,[0,0,0],4],static(rect(-2.5,-1,-1.5,-5),[1,8.3,9]),gate(rect(-2.5,-1,-1.5,-5),2.3),static(rect(2.5,-1,1.5,3),[1,16.3,11]),gate(rect(2.5,-1,1.5,3),2.3)]}
 function D24(){var x=rect(1,-0.2,-1,0.2);return [swing(rect(-10,1,10,10),9,4),[3,[5,1],4,ci(0.2),['p',[-9,9],[9,9]],0,0,[0,0,0],3],[3,[5,1],4,ci(0.2),['p',[-9,9],[9,9]],18,0,[0,0,0],-3],[1,[2,5],0,x,['p',[-9,9],[9,9]],-1,-pi/2,[0,0,0],4],static(Ci(0.2,0,9),[5,2,10]),static(Ci(0.2,0,9),[5,2,11]),static(Ci(0.2,0,9),[5,2,12]),static(Ci(0.2,0,9),[5,2,13]),static(Ci(0.2,0,9),[5,2,14]),rail(x,[0,9],4,4),rail(x,[0,9],4+pi/8,4),rail(x,[0,9],4+pi/4,4),rail(x,[0,9],4+7*pi/4,4),rail(x,[0,9],4+15*pi/8,4)]}
+function D25(){return [swing(['p',[-6,10],[-6,1],[-5,-1],[-4,1],[-3,-1],[-2,1],[-1,-1],[0,1],[1,-1],[2,1],[3,-1],[4,1],[5,-1],[6,1],[6,10]],2,4),swing(['p',[-6,-12],[-6,-1],[-5,-3],[-4,-1],[-3,-3],[-2,-1],[-1,-3],[0,-1],[1,-3],[2,-1],[3,-3],[4,-1],[5,-3],[6,-1],[6,-12]],2,4),spin(cross([-0.2,1]),[9,9],pi),static(Ci(1,11,11),[5,2,9]),static(Ci(1,11,11),[5,2,10]),static(Ci(1,11,11),[5,2,11]),static(Ci(1,11,11),[5,2,12]),static(Ci(1,11,11),[5,2,13]),rail(icicle(0.4),[9,9],4+pi/8,4),rail(icicle(0.4),[9,9],4+pi/16,4),rail(icicle(0.4),[9,9],4,4),rail(icicle(0.4),[9,9],4+15*pi/8,4),rail(icicle(0.4),[9,9],4+31+pi/16,4)]}
+function D26(){return [[0,[1,1.6],0,['p',[2,0],[0,2],[-2,0],[0,-2],[2,0],[2.2,0],[0,-2.2],[-2.2,0],[0,2.2],[2.2,0]],Ci(0,-8,0),0,0,[2,pi/2,inf],0],swing(rect(-1,-5.2,-2,-1.2),6.4,2),swing(rect(1,5.2,0,1.2),-6.4,2),rotate(ci(0.4),[5,0],max(0,2-abs(pla1-13)),0,2),rotate(ci(0.4),[5,0],max(0,2-abs(pla1-13)),pi,2),rail(rect(-20,10,10,-10),[-23,0],0,3)]}
+function rdm(x,y){return (y-x)*Math.random()+x}
+function A27(x){return addtr(rottr(rect(0.5,0.5,-0.5,-0.5),A27r[x]),[A27r[x+1],A27r[x+2]])}
+function D27(){return [static(A27(0),[0,0,1]),static(A27(3),[0,0,1]),static(A27(6),[0,0,1]),[3,[5,2],5,ci(0.5),['p',[8,8],[-8,8]],0,0,[0,0,0],4],[1,[2,5],0,rect(-0.5,4,0.5,-4),['p',[8,8],[-8,8]],-1,-pi/2,[0,0,0],4],static(Ci(0.5,5,0),[1,12.3,7]),[0,[2,2],8,ci(0.5),Ci(0,5,0),0,0,[1,3,1],0],gate(Ci(2,5,0),5),static(Ci(1,11,11),[1,9.5,10]),expand(rect(1,-7,-1,7),[2,2,11],[5,5],1),spin(rect(1,-7,-1,7),[5,5],pi/3)]}
+
+function A283(x){return static(Ci(1,11,11),[1,2*x+1,x+9])}
+function A284(x,y){return gate2(y,2*x-7,-61,3)}
+function D28(){
+var A281=['p',[0,10],[1,10],[1,51],[0,51],[0,31],[-20,31],[-20,30],[0,30]]
+var A282=['p',[1,10],[0,10],[0,51],[1,51],[1,31],[20,31],[20,30],[1,30]]
+return [A283(0),A283(1),A283(2),A283(3),A283(4),A283(5),A283(6),A283(7),A284(0,A281),A284(1,A281),A284(2,A282),A284(3,A281),A284(4,A282),A284(5,A282),A284(6,A281),A284(7,A281),static(rect(8.5,1,9.5,-1),[1,16.3,18]),gate2(rect(8.5,1,9.5,-1),0,1.3,3)]}
+
+function D29(){return [[0,[1,4.4],0,cross([0.2,2.5]),Ci(0,-5,0),0,0,[2,pi/3,inf],0],static(ds,[1,3,3]),[4,[2,5],0,rect(0,10,20,-10),['p',[20,0],[-9.5,0],[20,0]],0,0,[0,0,0],20],static(ds,[1,12,6]),static(ds,[1,12,7]),[4,[2,6],0,rect(-20,0,0,0.5),['p',[0,10],[0,0.5],[-20,-29.5]],0,0,[0,0,0],4],[4,[2,6],0,rect(20,0,0,0.5),['p',[0,10],[0,0.5],[20,-29.5]],0,0,[0,0,0],4],static(ds,[1,14,11]),static(ds,[1,14,12]),static(ds,[1,14,13]),[4,[1,14.8],14,rect(0,10,0.5,-10),['p',[5,20],[5,0]],0,0,[0,0,0],20],[4,[1,15.8],16,rect(0,10,0.5,-10),['p',[6,20],[6,0]],0,0,[0,0,0],20],[4,[1,16.8],17,rect(0,10,0.5,-10),['p',[7,20],[7,0]],0,0,[0,0,0],20],gate2(rect(0,10,0.5,-10),5,10.3,2),[0,[3,0.05,1],18,ds,dm,0,0,[0,0,0],0],gate2(rect(0,10,0.5,-10),6,-10.3,2),gate2(rect(0,10,0.5,-10),7,10.3,2),rail(rect(-1,-1,1,1),[-14,0],0,3)]}
+function D30(){
+var A302=[12,-8,14,-6,16,-4,18,-2,20,0,22,2,24,4,26,6,28,8,30,10,32,12]
+var A301=[-29,-9,-29,-7,-27,-5,-25,-3,-23,-1,-21,1,-19,3,-17,5,-15,7,-13,9]
+return [static(ds,[5,1,3]),static(ds,[5,1,6]),rail(rect(0.5,0.5,-0.5,-0.5),[11,1],pi,2),[4,[0,0],1,rect(-1,10,0,-10),['p'].concat(A301.map((i)=>[i,0])),0,0,[0,0,0],18],[4,[0,0],1,rect(1,10,0,-10),['p'].concat(A302.map((i)=>[i-0.5,0])),0,0,[0,0,0],18],rail(rect(0.5,0.5,-0.5,-0.5),[11,-1],pi,2)]}
+function D31(){return [[4,[0,0],1,['p',[2,-2],[2,2],[-2,2],[-2,-2],[2,-2],[20,-20],[-20,-20],[-20,20],[20,20],[20,-20]],['p'].concat(T31),0,0,[0,0,0],2],static(ds,[5,2,4]),static(ds,[5,2,5]),rail(icicle(0.4),[-9,9],4,4),rail(icicle(0.4),[9,-9],4,4),swing(Ci(0.5,-2,-2),4,1),swing(Ci(0.5,0,-2),4,1.9),swing(Ci(0.5,2,-2),4,2.8),static(rect(-6,-8.5,-5,-7.5),[1,2.8,11]),static(rect(5,7.5,6,8.5),[1,29.8,12]),gate(rect(-6,-8.5,-5,-7.5),0.8),gate(rect(5,7.5,6,8.5),-0.8)]}
+function D32(){var A32=(x,z)=>[static(ds,[1,A32r[z]+3,x]),rail(icicle(0.4),[A32r[z]-6,-2],pi/2,4)];return [static(rect(-10,-0.3,10,-10),[0,0,1]),static(ds,[5,2,4]),static(ds,[5,2,5]),rail(icicle(0.4),[-9,-9],4,4),rail(icicle(0.4),[9,-9],4,4),static(Ci(0.5,0,5),[0,0,1])].concat(A32(8,0),A32(10,1),A32(12,2),A32(14,3),A32(16,4),A32(18,5),A32(20,6),A32(22,7),A32(24,8),A32(26,9))}
+function D33(){return [static(Ci(0.5,10,-1),[5,rdm(2,3),2]),[4,[2,6],0,rect(-0.2,1,0.2,-1),['p',[10,-1],[-12,-1]],0,pi,[2,pi,inf],4],spin1(spike(0.5),[0,0],abs(2*((a/3)%1)-1)*1.5,pi/3,0),spin1(spike(0.5),[0,0],abs(2*((a/3)%1)-1)*1.5,pi/3,2*pi/3),spin1(spike(0.5),[0,0],abs(2*((a/3)%1)-1)*1.5,pi/3,-2*pi/3)]}
+function D34(){var A34=(x)=>spin(rect(2,x,-2,x+1),[0,0],2*pi/(x>0?x:-x-1))
+return [-9,-7,-5,-3,2,4,6,8].map(A34).concat([[0,[1,9],0,cross([0.2,2]),dm,0,0,[2,abs(pla1-10),inf],0],static(Ci(0.5,0,9),[5,2,12]),static(Ci(0.5,0,-9),[5,2,13]),rail(icicle(0.4),[0,9],4,4),rail(icicle(0.4),[0,-9],4,4)])}
+function D35(){return [[4,[5,2],2,ds,['p',[-10,0],[9,0]],'p',0,[0,0,0],0],[1,[2,3],3,spike(0.5),['p',[-10,12],[9,12]],-1,-pi/2,[0,0,0],4,true],[1,[0,0],3,spike(0.5),['p',[-10,0],[9,0]],-1,-pi/2,[0,0,0],0],static(Ci(1,10,10),[5,2,6]),static(Ci(1,10,-10),[5,2,7]),rail(rect(-5,0.2,0,-0.2),[10,10],4,5),rail(rect(-5,0.2,0,-0.2),[10,-10],4,5),[3,[0,0],1,Ci(0.5,0,-1),['p',[0,0],[0,2]],0,0,[0,0,0],1+(a%2)],[3,[0,0],1,Ci(0.5,-1.5,-1),['p',[0,0],[0,2]],0,0,[0,0,0],1+(a%2)],[3,[0,0],1,Ci(0.5,1.5,-1),['p',[0,0],[0,2]],0,0,[0,0,0],1+(a%2)],[3,[0,0],1,cross([0.2,3]),['p',[-5,-5],[-5,5]],5,0,[2,pi/4,inf],3],[3,[0,0],1,cross([0.2,3]),['p',[5,-5],[5,5]],5,0,[2,pi/4,inf],-3]]}
+function D36(){var A36=(x)=>static(Ci(0.5,9,-9),[5,x/2,13]);A361=['p',[-5,1],[-8,-5],[-2,-5]];A362=['p',[4.5,1],[5,2],[5.3,1.4]];A363=['p',[8.4,-4.8],[1.6,-4.8],[0,-8],[10,-8]]
+return [static(A361,[1,4.3,2]),gate2(A361,0,-1.25,3),static(A362,[1,10,4]),[4,[2,10],0,A362,['p',[0,0],[-5,-1.5],[-20,-1.5]],0,0,[0,0,0],4],static(['p',[4.5,1],[5.3,1.4],[8.4,-4.8],[1.6,-4.8]],[0,0,1]),static(A363,[1,16.3,7]),gate(A363,-0.6),A36(3),A36(5),A36(7),A36(11),A36(13),rail(spike(0.5),[9,-9],4,4)]}
+
 </script>
 </body>
 </html>
