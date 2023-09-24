@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <body>
+<script src="unpkg.com/force-graph"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
 <canvas id='c' width='400' height='400'></canvas><br>
 <button onclick='shuffle()'>shuffle</button>
@@ -15,7 +16,7 @@ function F(x){return Math.floor(x)}
 function sin(x){return Math.sin(x)}
 function cos(x){return Math.cos(x)}
 function A(x){return Math.abs(x)}
-function M(x,y){return x-y*F(x/y)}
+function M(x,y){return !y?0:x-y*F(x/y)}
 var R=3.2;r=0.4;c=1.8;N=16;L=1.6;S=2;V=0.5;h=120;co=1;st=1000;T=2;a=0
 function tr1(x){return x*S*h1/40+w/2}
 function tr2(x){return x*S*h1/40+h1/2}
@@ -33,6 +34,7 @@ function f(x){return f1(x,a,L/(m()-L),(m()-L)/N)}
 function xp(t){return d()*S*cos(t)+g(c)*cos(t*g(d()))}
 function yp(t){return d()*S*sin(t)-g(c)*sin(t*g(d()))}
 function u(){return A(L*N/(m()-L))}
+var dt=0.05
 function anim(){a=M(a+dt*V,m())}
 function point(t){ctx.fillRect(t[0],t[1],T,T)}
 function Tr(x){return [tr1(x[0]),tr2(x[1])]}
@@ -40,7 +42,7 @@ function plot(){for(i=0;i<u();i+=u()/st){point(Tr([xp(f(i*u())),yp(f(i*u()))]))}
 function draw(){
 gui.__controllers[4].__max=m()-0.01
 setvalue(obj);sethsv(h,1,1-co);ctx.fillRect(0,0,w,h1);sethsv(h,1,1);anim();plot()}
-var dt=0.05
+
 setInterval(draw,1000*dt)
 function k(x,y,t){return Fm(x+(y-x)*Math.random(),t)}
 var values={R:R,r:r,N:N,c:c,L:L,S:S,V:V,T:T,co:co,h:h,Density:st}
