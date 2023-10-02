@@ -117,6 +117,8 @@ float M(vec2 x){return sqrt(x.x*x.x+x.y*x.y);}
 vec2 rec(vec2 x){float x1=x.x*x.x+x.y*x.y;return vec2(x.x/x1,-x.y/x1);}
 vec2 div(vec2 x,vec2 y){return mult(x,rec(y));}
 vec2 cbr(vec2 x){return vec2(x.x*x.x*x.x-3.0*x.x*x.y*x.y,3.0*x.x*x.x*x.y-x.y*x.y*x.y);}
+int int_min(int x,int y){return x<y?x:y;}
+float smoothStep(float x){return min(1.0,max(0.0,x*x*(3.0-2.0*x)));}
 float cosh(float x){return (exp(x)+exp(-x))/2.0;}
 float sinh(float x){return (exp(x)-exp(-x))/2.0;}
 vec2 Sin(vec2 x){return vec2(sin(x.x)*cosh(x.y),cos(x.x)*sinh(x.y));}
@@ -128,9 +130,13 @@ vec2 Pow(vec2 x,vec2 y){if(x.x==0.0&&x.y==0.0){return vec2(0,0);}else{return Exp
 vec2 Sqrt(vec2 x){return vec2(sqrt(0.5*(M(x)+x.x)),sign(x.y)*sqrt(0.5*(M(x)-x.x)));}
 vec2 conj(vec2 x){return vec2(x.x,-x.y);}
 vec2 flip(vec2 x){return x.yx;}
-vec2 rot(vec2 x,float t){return vec2(x.x*cos(t)-x.y*sin(t),x.x*sin(t)+x.y*cos(t));}`
+vec2 rot(vec2 x,float t){return vec2(x.x*cos(t)-x.y*sin(t),x.x*sin(t)+x.y*cos(t));}
+vec3 getHsv(float x,float y,float z,float t){mat3 m1=mat3(y,x,0.0,x,y,y,0.0,0.0,x);mat3 m2=mat3(0.0,x,y,x,0.0,0.0,y,y,x);vec3 v;int z1=int(z);if(z1==0){v=m1[0];}else if(z1==1){v=m1[1];}else if(z1==2){v=m1[2];}else if(z1==3){v=m2[0];}else if(z1==4){v=m2[1];}else{v=m2[2];}return v+vec3(t);}
+vec3 hsv(vec3 x){vec3 v=clamp(x,0.0,1.0);return getHsv(v.y*v.z*(1.0-abs(mod(v.x*6.0,2.0)-1.0)),v.y*v.z,v.x*6.0,v.z-v.z*v.y);}
+float I=0.0;vec2 p=vec2(0);`
 this.ce=()=>mult(this.r.size(),0.5)
 this.uv={}
+this.hsv=false
 this.default=function(){return {f:'z2+c',c:'x,x,x',v:{c:this.ce(),r:1},b:'M(z)<16',u:[],t:[],i:'z=Z;c=C;',tr:'I=sqrt(I)/10.0;'}}
 this.v={c:this.ce(),r:1}
 }
@@ -139,7 +145,7 @@ rep(x,y,z){let t=new RegExp('[^a-z]'+y+'[^a-z]','g');
 return ('-'+x+'-').replace(t,(str)=>this.getstr(str,z)).replace(t,(str)=>this.getstr(str,z)).slice(1).slice(0,-1)}
 Rep(x,y,z){let t=x;itef((i)=>{t=this.rep(t,y[i],z[i])},0,L(y)-1);return t}
 split(x){let x1=this.Rep(x,['z2','z3','u','v','m','n','d','a','i','k'],['sqr(z)','cbr(z)','z.x','z.y','c.x','c.y','M(z-p)','atan(z.y,z.x)','vec2(0,1)','vec2(1,0)']);return reduce(x1.slice(1).split(''),x1.charAt(0),(y,z)=>y+(isNum(y.charAt(L(y)-1))^isNum(z)?'α':'')+z).split('α')}
-modify(x,t){let y=x.slice(t).split('');hs=false;z=0;d=-1;
+modify(x,t){let y=x.slice(t).split(''),hs=false,z=0,d=-1;
 for(let i=0;i<y.length;i++){
 if('{[('.indexOf(y[i])>=0){d++}
 else if('}])'.indexOf(y[i])>=0){d--}
@@ -157,26 +163,26 @@ Modify(x){return this.modify(x,x.indexOf('{'))}
 Mod1(x,i){return i<1?x:this.Modify(this.Mod1(x,i-1))}
 getN(x,str){return x.split('').filter((y)=>y==str).length}
 Mod(x){return this.Mod1(x,this.getN(x,'{'))}
-float(x){let t='';let y=this.split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});t=t.replace(/vec2.0/g,'vec2').replace(/\[/g,'vec2(').replace(/\]/g,')').replace(/fd1.0/g,'fd1').replace(/fd2.0/g,'fd2');return this.Mod(t)}
+float(x){let t='';let y=this.split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});t=t.replace(/vec2.0/g,'vec2').replace(/\[/g,'vec2(').replace(/\]/g,')');return this.Mod(t)}
 input(x){this.f=this.float(x.f);this.c=this.float(x.c);this.b=this.float(x.b);this.v=x.v;this.i=x.i;this.u=x.u;this.t=x.t;this.tr=x.tr;if(x.custom){this.custom=x.custom}}
-unif(){this.r.save();this.r.f='';this.r.inputUnifF(this.u.concat(['ce','r','c','center']),this.t.concat([2,1,2,2]));this.r.set('center',this.ce());this.U=this.r.f;this.r.load();return this.U}
+unif(){this.r.save();this.r.f='';this.r.inputUnifF(this.u.concat(['ce','r','c','center','useHSV']),this.t.concat([2,1,2,2,1]));this.r.set('center',this.ce());this.U=this.r.f;this.r.load();return this.U}
 viewport(){this.r.set('ce',this.v.c);this.r.set('r',this.v.r);this.r.set('center',this.ce())}
 seed(c){this.r.set('c',c)}
 set(u,x){this.r.set(u,x);this.uv[u]=x}
 Set(x){List(this.u).forEach((i)=>{this.set(this.u[i],x[i])})}
-Update(){List(this.u).forEach((x)=>{this.set(this.u[x],this.uv[this.u[x]])})}
+Update(){List(this.u).forEach((x)=>{this.set(this.u[x],this.uv[this.u[x]])});this.useHSV(this.hsv)}
 compute(){this.r.f=this.source;this.r.Update()}
 init(x){this.r.init(x)}
 render(){this.r.render()}
-compile(){this.source='precision highp float;'+this.unif()+this.complex+this.custom+'float I=0.0;vec2 p=vec2(0);bool isConv(vec2 z){return '+this.b+';}vec2 f(vec2 z,vec2 c){return '+this.f+';}vec3 color(float x,vec2 z,vec2 p){return vec3('+this.c+');}void main(){float ratio=min(center.x,center.y)/2.0;vec2 C=(c-center)/ratio;vec2 Z1=(gl_FragCoord.xy-center)/ratio;vec2 zce=(ce-center)/ratio;vec2 Z=mix(zce,Z1,1.0/r);vec2 zb;vec2 z;vec2 c;'+this.i+'for(int i=0;i<100;i++){if(!isConv(z-p)){break;}I+=1.0;zb=z;z=f(z,c);p=zb;}'+this.tr+'gl_FragColor=vec4(I==1.0?vec3(0):color(I,z,p),1.0);}';return this.source}
+compile(){this.source='precision highp float;'+this.unif()+this.complex+this.custom+'bool isConv(vec2 z){return '+this.b+';}vec2 f(vec2 z,vec2 c){return '+this.f+';}vec3 color(float x,vec2 z,vec2 p){return vec3('+this.c+');}void main(){float ratio=min(center.x,center.y)/2.0;vec2 C=(c-center)/ratio;vec2 Z1=(gl_FragCoord.xy-center)/(ratio);vec2 zce=(ce-center)/ratio;vec2 Z=mix(zce,Z1,1.0/r);vec2 zb;vec2 z;vec2 c;'+this.i+'for(int i=0;i<100;i++){if(!isConv(z-p)){break;}I+=1.0;zb=z;z=f(z,c);p=zb;}'+this.tr+'vec3 COLOR=color(I,z,p);gl_FragColor=vec4(I==1.0?vec3(0):(useHSV>0.0?hsv(COLOR):COLOR),1.0);}'}
 check(f){let gl=this.r.gl,shader=gl.createShader(gl.FRAGMENT_SHADER)
-gl.shaderSource(shader,f);return !gl.getShaderInfoLog(shader).length}
-formula(key,x){this.history=this[key];this.ss=this.source;this[key]=this.float(x);if(!this.check(this.compile())){this[key]=this.history;this.source=this.ss}}
-Formula(key,x,y,z){this.history=this[key];this.ss=this.source;this[key]=y+this.float(x)+z;if(!this.check(this.compile())){this[key]=this.history;this.source=this.ss}}
+gl.shaderSource(shader,f);gl.compileShader(shader);return gl.getShaderInfoLog(shader)}
+formula(key,x){this.history=this[key];this.ss=this.source;this[key]=this.float(x);this.compile();if(this.check(this.source).length){this[key]=this.history;this.source=this.ss}}
+Formula(key,x,y,z){this.history=this[key];this.ss=this.source;this[key]=y+this.float(x)+z;this.compile();if(this.check(this.source).length){this[key]=this.history;this.source=this.ss}}
 defv(){return {c:this.ce(),r:1}}
 deftr(){return 'I=sqrt(I)/10.0;'}
 dynamic(f){this.r.cursor((x,y)=>{f([x,y]);this.render()})}
-
+useHSV(x){this.r.set('useHSV',x?1:0);this.hsv=x}
 zoom(c,r){let c1=this.v.c;let r1=this.v.r
 this.v.r=r1*r
 this.v.c=[0,1].map((i)=>((r-1)*c[i]+r*(r1-1)*c1[i])/(this.v.r-1))
