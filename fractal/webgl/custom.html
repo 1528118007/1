@@ -23,10 +23,11 @@ Slice:<select id='slice'>
 </select>
 Gradient:<select id='grad'>
 <option value='0'>linear</option><option value='1' selected>sqrt</option><option value='2'>exponent</option><option value='3'>logarithm</option><option value='4'>reciprocal</option><option value='5'>zigzag</option><option value='6'>cycle</option>
-</select>
+</select><br>
 Smoothstep:<select id='ss'>
 <option value='0' selected>off</option><option value='1'>on</option>
 </select>
+HSV mode:<button onclick='fr.hsv=!fr.hsv;fr.useHSV(fr.hsv);this.innerHTML=["off","on"][fr.hsv?1:0]'>off</button>
 <br>
 <div id='adjt'>Adjust type:constant</div><br>
 <div id='fractals'></div><br>
@@ -34,7 +35,6 @@ Smoothstep:<select id='ss'>
 type1:1-x,1-x,1-x&emsp;&emsp;type2:sin(x),sin(x),cos(x)&emsp;&emsp;type 3:x*x,x*x,x<br>
 type 4:3*x-1,1-abs(3*x-2),1-abs(x*1.5-0.5)
 <br>
-
 <script>
 //#utils ARRAY{
 var list=(x,y,n)=>n>0?list(x,y,n-1).concat([x+y*(n-1)]):[]
@@ -155,6 +155,7 @@ float M(vec2 x){return sqrt(x.x*x.x+x.y*x.y);}
 vec2 rec(vec2 x){float x1=x.x*x.x+x.y*x.y;return vec2(x.x/x1,-x.y/x1);}
 vec2 div(vec2 x,vec2 y){return mult(x,rec(y));}
 vec2 cbr(vec2 x){return vec2(x.x*x.x*x.x-3.0*x.x*x.y*x.y,3.0*x.x*x.x*x.y-x.y*x.y*x.y);}
+int int_min(int x,int y){return x<y?x:y;}
 float smoothStep(float x){return min(1.0,max(0.0,x*x*(3.0-2.0*x)));}
 float cosh(float x){return (exp(x)+exp(-x))/2.0;}
 float sinh(float x){return (exp(x)-exp(-x))/2.0;}
@@ -168,9 +169,12 @@ vec2 Sqrt(vec2 x){return vec2(sqrt(0.5*(M(x)+x.x)),sign(x.y)*sqrt(0.5*(M(x)-x.x)
 vec2 conj(vec2 x){return vec2(x.x,-x.y);}
 vec2 flip(vec2 x){return x.yx;}
 vec2 rot(vec2 x,float t){return vec2(x.x*cos(t)-x.y*sin(t),x.x*sin(t)+x.y*cos(t));}
+vec3 getHsv(float x,float y,float z,float t){mat3 m1=mat3(y,x,0.0,x,y,y,0.0,0.0,x);mat3 m2=mat3(0.0,x,y,x,0.0,0.0,y,y,x);vec3 v;int z1=int(z);if(z1==0){v=m1[0];}else if(z1==1){v=m1[1];}else if(z1==2){v=m1[2];}else if(z1==3){v=m2[0];}else if(z1==4){v=m2[1];}else{v=m2[2];}return v+vec3(t);}
+vec3 hsv(vec3 x){vec3 v=clamp(x,0.0,1.0);return getHsv(v.y*v.z*(1.0-abs(mod(v.x*6.0,2.0)-1.0)),v.y*v.z,v.x*6.0,v.z-v.z*v.y);}
 float I=0.0;vec2 p=vec2(0);`
 this.ce=()=>mult(this.r.size(),0.5)
 this.uv={}
+this.hsv=false
 this.default=function(){return {f:'z2+c',c:'x,x,x',v:{c:this.ce(),r:1},b:'M(z)<16',u:[],t:[],i:'z=Z;c=C;',tr:'I=sqrt(I)/10.0;'}}
 this.v={c:this.ce(),r:1}
 }
@@ -199,16 +203,16 @@ getN(x,str){return x.split('').filter((y)=>y==str).length}
 Mod(x){return this.Mod1(x,this.getN(x,'{'))}
 float(x){let t='';let y=this.split(x);y.forEach((z)=>{if(parseInt(z)==parseFloat(z)&&(parseInt(z)==0||parseInt(z))){t+=(z+'.0')}else{t+=z}});t=t.replace(/vec2.0/g,'vec2').replace(/\[/g,'vec2(').replace(/\]/g,')');return this.Mod(t)}
 input(x){this.f=this.float(x.f);this.c=this.float(x.c);this.b=this.float(x.b);this.v=x.v;this.i=x.i;this.u=x.u;this.t=x.t;this.tr=x.tr;if(x.custom){this.custom=x.custom}}
-unif(){this.r.save();this.r.f='';this.r.inputUnifF(this.u.concat(['ce','r','c','center']),this.t.concat([2,1,2,2]));this.r.set('center',this.ce());this.U=this.r.f;this.r.load();return this.U}
+unif(){this.r.save();this.r.f='';this.r.inputUnifF(this.u.concat(['ce','r','c','center','useHSV']),this.t.concat([2,1,2,2,1]));this.r.set('center',this.ce());this.U=this.r.f;this.r.load();return this.U}
 viewport(){this.r.set('ce',this.v.c);this.r.set('r',this.v.r);this.r.set('center',this.ce())}
 seed(c){this.r.set('c',c)}
 set(u,x){this.r.set(u,x);this.uv[u]=x}
 Set(x){List(this.u).forEach((i)=>{this.set(this.u[i],x[i])})}
-Update(){List(this.u).forEach((x)=>{this.set(this.u[x],this.uv[this.u[x]])})}
+Update(){List(this.u).forEach((x)=>{this.set(this.u[x],this.uv[this.u[x]])});this.useHSV(this.hsv)}
 compute(){this.r.f=this.source;this.r.Update()}
 init(x){this.r.init(x)}
 render(){this.r.render()}
-compile(){this.source='precision highp float;'+this.unif()+this.complex+this.custom+'bool isConv(vec2 z){return '+this.b+';}vec2 f(vec2 z,vec2 c){return '+this.f+';}vec3 color(float x,vec2 z,vec2 p){return vec3('+this.c+');}void main(){float ratio=min(center.x,center.y)/2.0;vec2 C=(c-center)/ratio;vec2 Z1=(gl_FragCoord.xy-center)/ratio;vec2 zce=(ce-center)/ratio;vec2 Z=mix(zce,Z1,1.0/r);vec2 zb;vec2 z;vec2 c;'+this.i+'for(int i=0;i<100;i++){if(!isConv(z-p)){break;}I+=1.0;zb=z;z=f(z,c);p=zb;}'+this.tr+'gl_FragColor=vec4(I==1.0?vec3(0):color(I,z,p),1.0);}'}
+compile(){this.source='precision highp float;'+this.unif()+this.complex+this.custom+'bool isConv(vec2 z){return '+this.b+';}vec2 f(vec2 z,vec2 c){return '+this.f+';}vec3 color(float x,vec2 z,vec2 p){return vec3('+this.c+');}void main(){float ratio=min(center.x,center.y)/2.0;vec2 C=(c-center)/ratio;vec2 Z1=(gl_FragCoord.xy-center)/(ratio);vec2 zce=(ce-center)/ratio;vec2 Z=mix(zce,Z1,1.0/r);vec2 zb;vec2 z;vec2 c;'+this.i+'for(int i=0;i<100;i++){if(!isConv(z-p)){break;}I+=1.0;zb=z;z=f(z,c);p=zb;}'+this.tr+'vec3 COLOR=color(I,z,p);gl_FragColor=vec4(I==1.0?vec3(0):(useHSV>0.0?hsv(COLOR):COLOR),1.0);}'}
 check(f){let gl=this.r.gl,shader=gl.createShader(gl.FRAGMENT_SHADER)
 gl.shaderSource(shader,f);gl.compileShader(shader);return gl.getShaderInfoLog(shader)}
 formula(key,x){this.history=this[key];this.ss=this.source;this[key]=this.float(x);this.compile();if(this.check(this.source).length){this[key]=this.history;this.source=this.ss}}
@@ -216,7 +220,7 @@ Formula(key,x,y,z){this.history=this[key];this.ss=this.source;this[key]=y+this.f
 defv(){return {c:this.ce(),r:1}}
 deftr(){return 'I=sqrt(I)/10.0;'}
 dynamic(f){this.r.cursor((x,y)=>{f([x,y]);this.render()})}
-
+useHSV(x){this.r.set('useHSV',x?1:0);this.hsv=x}
 zoom(c,r){let c1=this.v.c;let r1=this.v.r
 this.v.r=r1*r
 this.v.c=[0,1].map((i)=>((r-1)*c[i]+r*(r1-1)*c1[i])/(this.v.r-1))
@@ -226,6 +230,8 @@ this.render()
 dynamicViewport(){this.r.e.onmousewheel=(e)=>{e.preventDefault();this.zoom([e.offsetX,e.offsetY],1-e.deltaY/1000)}}
 }
 //}endutils
+
+
 var adjt=0
 var fr=new Fractal();fr.input({f:'F(z,c)',c:'x,x,x',u:['mode','inverted','R'],t:[1,1,2],v:{c:fr.ce(),r:1},b:'mode<1?M(z)<100:M(z)>0.01',tr:fr.deftr(),i:'if(inverted>0.0){Z=rec(Z);}z=Z;c=C;',custom:'vec2 F(vec2 z,vec2 c){return sqr(z)+c;}'});
 var seed=fr.ce()
@@ -245,9 +251,10 @@ E('slice').onchange=function(){fr.i='if(inverted>0.0){Z=rec(Z);}'+i_slice();fr.c
 fr.seed(seed);fr.viewport();fr.render()}
 var fractals='Julia set:z2+c&Nova fractal:2*z/3+{z2}/3+c&Burning ship fractal:sqr(abs(z))-c&Lambda fractal:{c,z-z2}&Magnet 1:sqr({z2+c-k;2*z+c-2*k})&Magnet 2:sqr(k+{cbr(z-k);sqr(c)+3*{z-k,z+c-k}})&Phoenix fractal:z2+{R,p}+c'.replaceAll('&','<br>')
 E('fractals').innerHTML=fractals
-var i_grad=()=>['I/=100.0','I=sqrt(I)/10.0','I=1.0-pow(1.1,-I)','I=log(I)/log(100.0)','I/=I+1.0','I=abs(sin(I/10.0))','I=mod(I/20.0,1.0)'][+E('grad').value]+';'+['','I=smoothStep(I);'][+E('ss').value]
+var i_grad=()=>'if(I==100.0){I=1.0;}else{'+['I/=100.0','I=sqrt(I)/10.0','I=1.0-pow(1.1,-I)','I=log(I)/log(100.0)','I/=I+1.0','I=abs(sin(I/10.0))','I=mod(I/20.0,1.0)'][+E('grad').value]+';}'+['','I=smoothStep(I);'][+E('ss').value]
 E('grad').onchange=function(){Update('tr',i_grad(),'','')}
 E('ss').onchange=E('grad').onchange
+
 </script>
 </body>
 </html>
