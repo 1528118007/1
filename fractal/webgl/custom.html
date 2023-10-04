@@ -10,7 +10,7 @@ border:none;
 function:<input id='frac' value='z2+c'>
 <button onclick='fr.v=fr.defv();fr.viewport();fr.render()'>refresh</button>
 <button onclick='fr.seed(fr.ce());seed=fr.ce();fr.render()'>c=0</button>
-<button onclick='fr.seed([fr.ce()[0]*11/8,fr.ce()[1]]);seed=[fr.ce()[0]/2+fr.ce()[1]/4,fr.ce()[1]];fr.render()'>c=1</button>
+<button onclick='fr.seed([fr.ce()[0]+fr.ce()[1]/2,fr.ce()[1]]);seed=[fr.ce()[0]+fr.ce()[1]/2,fr.ce()[1]];fr.render()'>c=1</button>
 <br>
 palette:<input id='color' value='x,x,x'><br>
 fractal formula:<input id='Frac' value='F'><br>
@@ -19,7 +19,7 @@ Inversion:<select id='inverted'>
 <option value='0'>normal</option><option value='1'>inverted</option>
 </select>
 Slice:<select id='slice'>
-<option value='0'>xy</option><option value='1'>xz</option><option value='2'>xw</option><option value='3'>yz</option><option value='4'>yw</option><option value='5'>zw</option>
+<option value='0'>xy</option><option value='1'>xz</option><option value='2'>xw</option><option value='3'>yz</option><option value='4'>yw</option><option value='5'>zw</option><option value='6'>z₀=c</option>
 </select>
 Gradient:<select id='grad'>
 <option value='0'>linear</option><option value='1' selected>sqrt</option><option value='2'>exponent</option><option value='3'>logarithm</option><option value='4'>reciprocal</option><option value='5'>zigzag</option><option value='6'>cycle</option>
@@ -28,6 +28,12 @@ Smoothstep:<select id='ss'>
 <option value='0' selected>off</option><option value='1'>on</option>
 </select>
 HSV mode:<button onclick='fr.hsv=!fr.hsv;fr.useHSV(fr.hsv);this.innerHTML=["off","on"][fr.hsv?1:0]'>off</button>
+Bail type:<select id='b'>
+<option value='mode>0?M(z)>1/E:M(z)<E'>circle</option>
+<option value='mode>0?sq(z)>1/E:sq(z)<E'>square</option>
+<option value='mode>0?abs(u*v)>1/(E*E):abs(u*v)<E*E'>hyperbola</option>
+<option value='mode>0?abs(u)+abs(v)>1/E:abs(u)+abs(v)<E'>diamond</option>
+</select>
 <br>
 <div id='adjt'>Adjust type:constant</div><br>
 <div id='fractals'></div><br>
@@ -37,126 +43,29 @@ type 4:3*x-1,1-abs(3*x-2),1-abs(x*1.5-0.5)
 <br>
 <script>
 //#utils ARRAY{
-var list=(x,y,n)=>n>0?list(x,y,n-1).concat([x+y*(n-1)]):[]
-var List=(x)=>list(0,1,x.length)
-var L=(x)=>x.length
-var reduce=(x,i,f)=>[i].concat(x).reduce(f)
-var substr=(x,y)=>y.map((i)=>x[i])
-var sort=(x,y)=>substr(x,List(y).sort((z,t)=>y[z]-y[t]))
-var Min=(x)=>reduce(x,1/0,(y,z)=>y<z?y:z)
-var Max=(x)=>reduce(x,-1/0,(y,z)=>y>z?y:z)
-var total=(x)=>reduce(x,0,(y,z)=>y+z)
-var In=(x,y)=>y.some((z)=>x==z)
-function rdm(x){if(!x){return Math.random()}else{return list(0,1,x).map(Math.random)}}
-var union=(x)=>reduce(x,[],(y,z)=>y.concat(z))
-var modify=(x,i,n,r)=>x.slice(0,i-1).concat(r,x.slice(i+n))
-var map2f=(x,y,f)=>List(x).map((i)=>f(x[i],y[i],i))
-var un=(x,y)=>typeof(x)=='undefined'?y:x
-var add=(x,y)=>map2f(x,y,(z,t)=>z+un(t,y))
-var subt=(x,y)=>map2f(x,y,(z,t)=>z-un(t,y))
-var mult=(x,y)=>map2f(x,y,(z,t)=>z*un(t,y))
-var Add=(x,y)=>map2f(x,y,(z,t)=>add(z,t*0+1?y:t))
-var Subt=(x,y)=>map2f(x,y,(z,t)=>subt(z,t*0+1?y:t))
-var Mult=(x,y)=>map2f(x,y,(z,t)=>mult(z,un(t,y)))
-var clone=(x,n)=>substr([x],list(0,0,n))
-var Rep=(x,f)=>union(map2f(x,[0],(z,t,i)=>clone(z,f(i))))
-var rep=(x,n)=>Rep(x,()=>n)
-var exstr=(x,y)=>x.filter((z,t)=>!In(t,y))
-var unique=(x)=>x.filter((y,z)=>!In(y,x.slice(0,z-1)))
-var shuffle=(x)=>x.sort(()=>0.5-rdm())
-var Total=(x)=>reduce(x,[0,0],add)
-var expa=(x,y,f)=>union(x.map((z)=>y.map((t)=>f(z,t))))
-var expp=(x,y,i)=>[x[Math.floor(i/L(y))],y[i%L(y)]]
-var amount=(x,n)=>x.filter((y)=>y==n).length
-var iter=(f,x,n)=>reduce(list(0,0,n),x,f)
-function itef(f,x,y){list(x,1,y-x+1).forEach(f)}
-var dot=(x,y)=>total(mult(x,y))
-var lerp=(x,y,t)=>add(x,mult(subt(y,x),t))
-var M=(x)=>Math.sqrt(dot(x,x))
-var ref=(x,y)=>subt(x,mult(y,2*dot(x,y)/dot(y,y)))
-var arg=(x,y)=>Math.acos(dot(x,y)/(M(x)*M(y)))
-var cross=(x,y)=>[x[1]*y[2]-x[2]*y[1],x[2]*y[0]-y[2]*x[0],x[0]*y[1]-y[0]*x[1]]
-var mean=(x)=>total(x)/L(x)
-var centroid=(x)=>mult(Total(x),1/L(x))
-var isNum=(x)=>(+x)*0+1||x=='.'
+var list=(x,y,n)=>n>0?list(x,y,n-1).concat([x+y*(n-1)]):[];var List=(x)=>list(0,1,x.length);var L=(x)=>x.length;var reduce=(x,i,f)=>[i].concat(x).reduce(f);var substr=(x,y)=>y.map((i)=>x[i]);var sort=(x,y)=>substr(x,List(y).sort((z,t)=>y[z]-y[t]));var Min=(x)=>reduce(x,1/0,(y,z)=>y<z?y:z);var Max=(x)=>reduce(x,-1/0,(y,z)=>y>z?y:z);var total=(x)=>reduce(x,0,(y,z)=>y+z);var In=(x,y)=>y.some((z)=>x==z);function rdm(x){if(!x){return Math.random()}else{return list(0,1,x).map(Math.random)}};var union=(x)=>reduce(x,[],(y,z)=>y.concat(z));var modify=(x,i,n,r)=>x.slice(0,i-1).concat(r,x.slice(i+n));var map2f=(x,y,f)=>List(x).map((i)=>f(x[i],y[i],i));var un=(x,y)=>x??y;var add=(x,y)=>map2f(x,y,(z,t)=>z+un(t,y));var subt=(x,y)=>map2f(x,y,(z,t)=>z-un(t,y));var mult=(x,y)=>map2f(x,y,(z,t)=>z*un(t,y));var Add=(x,y)=>map2f(x,y,(z,t)=>add(z,t*0+1?y:t));var Subt=(x,y)=>map2f(x,y,(z,t)=>subt(z,t*0+1?y:t));var Mult=(x,y)=>map2f(x,y,(z,t)=>mult(z,un(t,y)));var clone=(x,n)=>substr([x],list(0,0,n));var Rep=(x,f)=>union(map2f(x,[0],(z,t,i)=>clone(z,f(i))));var rep=(x,n)=>Rep(x,()=>n);var exstr=(x,y)=>x.filter((z,t)=>!In(t,y));var unique=(x)=>x.filter((y,z)=>!In(y,x.slice(0,z-1)));var shuffle=(x)=>x.sort(()=>0.5-rdm());var Total=(x)=>reduce(x,[0,0],add);var expa=(x,y,f)=>union(x.map((z)=>y.map((t)=>f(z,t))));var expp=(x,y,i)=>[x[Math.floor(i/L(y))],y[i%L(y)]];var amount=(x,n)=>x.filter((y)=>y==n).length;var iter=(f,x,n)=>reduce(list(0,0,n),x,f);function itef(f,x,y){list(x,1,y-x+1).forEach(f)};var dot=(x,y)=>total(mult(x,y));var lerp=(x,y,t)=>add(x,mult(subt(y,x),t));var M=(x)=>Math.sqrt(dot(x,x));var ref=(x,y)=>subt(x,mult(y,2*dot(x,y)/dot(y,y)));var arg=(x,y)=>Math.acos(dot(x,y)/(M(x)*M(y)));var cross=(x,y)=>[x[1]*y[2]-x[2]*y[1],x[2]*y[0]-y[2]*x[0],x[0]*y[1]-y[0]*x[1]];var mean=(x)=>total(x)/L(x);var centroid=(x)=>mult(Total(x),1/L(x));var isNum=(x)=>(+x)*0+1||x=='.'
 //}
 //#endutils
 //utils WEBGL{
-class Renderer{
-constructor(){
-this.e=document.createElement('canvas');this.gl=this.e.getContext('webgl')
-this.V=this.gl.createShader(this.gl.VERTEX_SHADER)
-this.F=this.gl.createShader(this.gl.FRAGMENT_SHADER)
-this.defv='void main(){gl_Position=position;}'
-this.v=this.defv;this.f='void main(){gl_FragColor=vec4(gl_FragCoord.xy/500.0,sin(gl_FragCoord.z),1.0);}'
-this.gl.shaderSource(this.V,'attribute vec4 position;'+this.v);this.gl.shaderSource(this.F,'precision highp float;'+this.f)
-this.color=[0,0,0]
-this.p=this.gl.createProgram();this.b=this.gl.createBuffer();this.ab=()=>this.gl.ARRAY_BUFFER
-this.gl.compileShader(this.V);this.gl.attachShader(this.p,this.V)
-this.gl.compileShader(this.F);this.gl.attachShader(this.p,this.F)
-this.gl.linkProgram(this.p);this.gl.useProgram(this.p)
-this.bData=[1,1,-1,1,-1,-1,-1,-1,1,1,1,-1]
-this.unif={};this.utype={}
-this.gl.bindBuffer(this.ab(),this.b);this.gl.bufferData(this.ab(),new Float32Array(this.bData),this.gl.STATIC_DRAW)
-this.a=()=>this.gl.getAttribLocation(this.p,'position')
-this.gl.enableVertexAttribArray(this.a())
-this.gl.vertexAttribPointer(this.a(),2,this.gl.FLOAT,false,0,0)
-}
-element(x){return document.getElementById(x)}
-attachTo(x){this.element(x).appendChild(this.e)}
-update(v,f){this.v=v;this.f=f
-this.gl.shaderSource(this.V,'attribute vec4 position;'+this.v);this.gl.shaderSource(this.F,'precision highp float;'+this.f)
-this.gl.compileShader(this.V);this.gl.compileShader(this.F)
-this.gl.linkProgram(this.p)}
-Update(){this.update(this.v,this.f)}
-types(x){return ['float','vec2','vec3','vec4'][x-1]}
-unifV(x,type){let xx=x;this.v='uniform '+this.types(type)+' '+x+';'+this.v;this.unif[x]=()=>this.gl.getUniformLocation(this.p,xx)}
-unifF(x,type){let xx=x;this.f='uniform '+this.types(type)+' '+x+';'+this.f;this.unif[x]=()=>this.gl.getUniformLocation(this.p,xx)}
-UnifV(){for(x in this.unif){this.unifV(x,this.utype[x])}}
-UnifF(){for(x in this.unif){this.unifF(x,this.utype[x])}}
-shape(x,type,y){this.drawType=!type?'STATIC_DRAW':type;this.gl.bufferData(this.ab(),new Float32Array(x),this.gl[this.drawType]);this.bData=x;this.gl.vertexAttribPointer(this.a(),un(y,2),this.gl.FLOAT,false,0,0)}
-set(u,x){switch(un(L(x),1)){
-case 1:this.gl.uniform1f(this.unif[u](),x);break
-case 2:this.gl.uniform2fv(this.unif[u](),x);break
-case 3:this.gl.uniform3fv(this.unif[u](),x);break
-case 4:this.gl.uniform4fv(this.unif[u](),x);break
-}
-}
-setSize(x,y){this.e.width=x;this.e.height=y;this.gl.viewport(0,0,x,y)}
-size(){return [window.innerWidth,window.innerHeight]}
-fullScreen(){this.setSize(...this.size())}
-render(x){this.gl.drawArrays(this.gl[un(x,'triangles').toUpperCase()],0,L(this.bData))}
-cursor(f,x){this.e.addEventListener('mousemove',function(e){f(e.offsetX,e.offsetY)});this.render(x)}
-init(x){this.Update();this.attachTo(x);this.fullScreen()}
-setUnifV(u,t,v){List(u).forEach((i)=>{this.unifV(u[i],t[i]);this.set(u[i],v[i])})}
-setUnifF(u,t,v){List(u).forEach((i)=>{this.unifF(u[i],t[i]);this.set(u[i],v[i])})}
-inputUnifV(u,t){List(u).forEach((i)=>{this.unifV(u[i],t[i])})}
-inputUnifF(u,t){List(u).forEach((i)=>{this.unifF(u[i],t[i])})}
-Set(u,v){List(v).forEach((i)=>{this.set(u[i],v[i])})}
-source(x,type){this[type]=document.getElementById(x).innerText}
-debug(){let v=this.gl.getShaderInfoLog(this.V);let f=this.gl.getShaderInfoLog(this.F);let p=this.gl.getProgramInfoLog(this.p);return (L(v)>0?'vertex shader:'+v:'')+(L(f)>0?'fragment shader:'+f:'')+(L(p)>0?'program:'+p:'')}
-bg(x,y,z){this.gl.clearColor(x,y,z,1);this.gl.clear(this.gl.COLOR_BUFFER_BIT)}
-save(){this.vs=this.v;this.fs=this.f;this.bs=this.bData}
-load(){this.v=this.vs;this.f=this.fs;this.bData=this.bs}
-floatVec3(x){return 'vec4('+x.map((y)=>!y%1?y+'.0':y+'').toString()+',1.0)'}
-drawPoly(x,c,t){this.save();this.update(this.defv,'void main(){gl_FragColor='+this.floatVec3(un(c,this.color))+';}');this.shape(union(x));this.render(t);this.load()}
-convexPoly(x,c){this.drawPoly(x,c,'triangle_fan')}
-triangleArray(x,c){this.drawPoly(union(x),c)}
-poly4Array(x,c){this.drawPoly(union(x.map((y)=>substr(y,[0,1,2,3,1,2]))),c)}
-}
+class Renderer{constructor(){this.e=document.createElement('canvas');this.gl=this.e.getContext('webgl');this.V=this.gl.createShader(this.gl.VERTEX_SHADER);this.F=this.gl.createShader(this.gl.FRAGMENT_SHADER);this.defv='void main(){gl_Position=position;}';this.v=this.defv;this.f='void main(){gl_FragColor=vec4(gl_FragCoord.xy/500.0,sin(gl_FragCoord.z),1.0);}';this.gl.shaderSource(this.V,'attribute vec4 position;'+this.v);this.gl.shaderSource(this.F,'precision highp float;'+this.f);this.color=[0,0,0];this.p=this.gl.createProgram();this.b=this.gl.createBuffer();this.ab=()=>this.gl.ARRAY_BUFFER;this.gl.compileShader(this.V);this.gl.attachShader(this.p,this.V);this.gl.compileShader(this.F);this.gl.attachShader(this.p,this.F);this.gl.linkProgram(this.p);this.gl.useProgram(this.p);this.bData=[1,1,-1,1,-1,-1,-1,-1,1,1,1,-1];this.unif={};this.utype={};this.gl.bindBuffer(this.ab(),this.b);this.gl.bufferData(this.ab(),new Float32Array(this.bData),this.gl.STATIC_DRAW);this.a=()=>this.gl.getAttribLocation(this.p,'position');this.gl.enableVertexAttribArray(this.a());this.gl.vertexAttribPointer(this.a(),2,this.gl.FLOAT,false,0,0)}element(x){return document.getElementById(x)}attachTo(x){this.element(x).appendChild(this.e)}update(v,f){this.v=v;this.f=f;this.gl.shaderSource(this.V,'attribute vec4 position;'+this.v);this.gl.shaderSource(this.F,'precision highp float;'+this.f);this.gl.compileShader(this.V);this.gl.compileShader(this.F);this.gl.linkProgram(this.p)}Update(){this.update(this.v,this.f)}types(x){return ['float','vec2','vec3','vec4'][x-1]}unifV(x,type){let xx=x;this.v='uniform '+this.types(type)+' '+x+';'+this.v;this.unif[x]=()=>this.gl.getUniformLocation(this.p,xx)}unifF(x,type){let xx=x;this.f='uniform '+this.types(type)+' '+x+';'+this.f;this.unif[x]=()=>this.gl.getUniformLocation(this.p,xx)}UnifV(){for(x in this.unif){this.unifV(x,this.utype[x])}}UnifF(){for(x in this.unif){this.unifF(x,this.utype[x])}}shape(x,type,y){this.drawType=!type?'STATIC_DRAW':type;this.gl.bufferData(this.ab(),new Float32Array(x),this.gl[this.drawType]);this.bData=x;this.gl.vertexAttribPointer(this.a(),un(y,2),this.gl.FLOAT,false,0,0)}set(u,x){switch(un(L(x),1)){case 1:this.gl.uniform1f(this.unif[u](),x);break;case 2:this.gl.uniform2fv(this.unif[u](),x);break;case 3:this.gl.uniform3fv(this.unif[u](),x);break;case 4:this.gl.uniform4fv(this.unif[u](),x);break}}setSize(x,y){this.e.width=x;this.e.height=y;this.gl.viewport(0,0,x,y)}size(){return [window.innerWidth,window.innerHeight]}fullScreen(){this.setSize(...this.size())}render(x){this.gl.drawArrays(this.gl[un(x,'triangles').toUpperCase()],0,L(this.bData))}cursor(f,x){this.e.addEventListener('mousemove',function(e){f(e.offsetX,e.offsetY)});this.render(x)}init(x){this.Update();this.attachTo(x);this.fullScreen()}setUnifV(u,t,v){List(u).forEach((i)=>{this.unifV(u[i],t[i]);this.set(u[i],v[i])})}setUnifF(u,t,v){List(u).forEach((i)=>{this.unifF(u[i],t[i]);this.set(u[i],v[i])})}inputUnifV(u,t){List(u).forEach((i)=>{this.unifV(u[i],t[i])})}inputUnifF(u,t){List(u).forEach((i)=>{this.unifF(u[i],t[i])})}Set(u,v){List(v).forEach((i)=>{this.set(u[i],v[i])})}source(x,type){this[type]=document.getElementById(x).innerText}debug(){let v=this.gl.getShaderInfoLog(this.V);let f=this.gl.getShaderInfoLog(this.F);let p=this.gl.getProgramInfoLog(this.p);return (L(v)>0?'vertex shader:'+v:'')+(L(f)>0?'fragment shader:'+f:'')+(L(p)>0?'program:'+p:'')}bg(x,y,z){this.gl.clearColor(x,y,z,1);this.gl.clear(this.gl.COLOR_BUFFER_BIT)}save(){this.vs=this.v;this.fs=this.f;this.bs=this.bData}load(){this.v=this.vs;this.f=this.fs;this.bData=this.bs}floatVec3(x){return 'vec4('+x.map((y)=>!y%1?y+'.0':y+'').toString()+',1.0)'}drawPoly(x,c,t){this.save();this.update(this.defv,'void main(){gl_FragColor='+this.floatVec3(un(c,this.color))+';}');this.shape(union(x));this.render(t);this.load()}convexPoly(x,c){this.drawPoly(x,c,'triangle_fan')}triangleArray(x,c){this.drawPoly(union(x),c)}poly4Array(x,c){this.drawPoly(union(x.map((y)=>substr(y,[0,1,2,3,1,2]))),c)}}
 //}endutils
-//utils FRACTAL{
+
+
 var Fractal=class{
 constructor(){this.r=new Renderer()
 this.custom=''
+
+//complex_number_database
 this.complex=`vec2 mult(vec2 x,vec2 y){return vec2(x.x*y.x-x.y*y.y,x.x*y.y+x.y*y.x);}
 vec2 sqr(vec2 x){return mult(x,x);}
 float M(vec2 x){return sqrt(x.x*x.x+x.y*x.y);}
+float sq(vec2 x){return max(abs(x.x),abs(x.y));}
 vec2 rec(vec2 x){float x1=x.x*x.x+x.y*x.y;return vec2(x.x/x1,-x.y/x1);}
 vec2 div(vec2 x,vec2 y){return mult(x,rec(y));}
 vec2 cbr(vec2 x){return vec2(x.x*x.x*x.x-3.0*x.x*x.y*x.y,3.0*x.x*x.x*x.y-x.y*x.y*x.y);}
 int int_min(int x,int y){return x<y?x:y;}
-float smoothStep(float x){return min(1.0,max(0.0,x*x*(3.0-2.0*x)));}
+//float smoothStep(float x){return min(1.0,max(0.0,x*x*(3.0-2.0*x)));}
+float loga(float x){return abs(log(x));}
 float cosh(float x){return (exp(x)+exp(-x))/2.0;}
 float sinh(float x){return (exp(x)-exp(-x))/2.0;}
 vec2 Sin(vec2 x){return vec2(sin(x.x)*cosh(x.y),cos(x.x)*sinh(x.y));}
@@ -172,14 +81,24 @@ vec2 rot(vec2 x,float t){return vec2(x.x*cos(t)-x.y*sin(t),x.x*sin(t)+x.y*cos(t)
 vec3 getHsv(float x,float y,float z,float t){mat3 m1=mat3(y,x,0.0,x,y,y,0.0,0.0,x);mat3 m2=mat3(0.0,x,y,x,0.0,0.0,y,y,x);vec3 v;int z1=int(z);if(z1==0){v=m1[0];}else if(z1==1){v=m1[1];}else if(z1==2){v=m1[2];}else if(z1==3){v=m2[0];}else if(z1==4){v=m2[1];}else{v=m2[2];}return v+vec3(t);}
 vec3 hsv(vec3 x){vec3 v=clamp(x,0.0,1.0);return getHsv(v.y*v.z*(1.0-abs(mod(v.x*6.0,2.0)-1.0)),v.y*v.z,v.x*6.0,v.z-v.z*v.y);}
 float I=0.0;vec2 p=vec2(0);`
+//awesome messages XD
+//XD
+//XDXDXDD
+//WARNING,IT'S COMING!!!
+
+
+
+this.MESSAGES=['This is not a news message.Just an olds message.','To cum,or not to cum.That is the question.','Believe it or not,he can go down on himself.','Wish you make l♡ve every day but no babies forever.','He flashed in public but saw his manhood broken in halvs.','Doesn\'t it annoy you when people don\'t finish their','Go and have the Interweave of Black and White.','Black stick and white fluid.','This message is notably a rickroll.','If you see this message,your wife will ejac---','The sausage got stuck in the tube.Now it\'s head is no longer round.','So sexy.So stimulating.So sweet.So stiff.So sticky.So satisfying.','She stroked his arrow from the feathers to the point.','You can talk the talk,you can walk the walk,but can you cum the cum?','Mix tadpoles with eggs to get a new creature.','No thanks,it has come out.','I gave her a pence.She came over the fence.\nI gave her a shilling.And she was willing.\nI gave her a smack.And she opened her crack.','His willy caused some white pollution.','His thingy wasn\'t standing,but hers were very wet.','Please lie down.I\'m coming.\nDon\'t do it.I\'m still in the refractory period.\n(smiled and lay down)\nReversed missionary position?!\n(stroked him)\nUhhhh,it\'s so sensitive...\nEnjoy it.\nNo,my trousers,my trousers! ! !\nJust calm down.\nD...d...don\'t do it.\nWait,yours is truncated?!?!']
+
 this.ce=()=>mult(this.r.size(),0.5)
 this.uv={}
 this.hsv=false
 this.default=function(){return {f:'z2+c',c:'x,x,x',v:{c:this.ce(),r:1},b:'M(z)<16',u:[],t:[],i:'z=Z;c=C;',tr:'I=sqrt(I)/10.0;'}}
 this.v={c:this.ce(),r:1}
 }
+getSecretMessage(){console.log(shuffle(this.MESSAGES)[0])}
 getstr(str,z){return str.charAt(0)+z+str.charAt(str.length-1)}
-rep(x,y,z){let t=new RegExp('[^a-z]'+y+'[^a-z]','g');
+rep(x,y,z){let t=new RegExp('[^a-z]'+y+'[^a-z\(]','g');
 return ('-'+x+'-').replace(t,(str)=>this.getstr(str,z)).replace(t,(str)=>this.getstr(str,z)).slice(1).slice(0,-1)}
 Rep(x,y,z){let t=x;itef((i)=>{t=this.rep(t,y[i],z[i])},0,L(y)-1);return t}
 split(x){let x1=this.Rep(x,['z2','z3','u','v','m','n','d','a','i','k'],['sqr(z)','cbr(z)','z.x','z.y','c.x','c.y','M(z-p)','atan(z.y,z.x)','vec2(0,1)','vec2(1,0)']);return reduce(x1.slice(1).split(''),x1.charAt(0),(y,z)=>y+(isNum(y.charAt(L(y)-1))^isNum(z)?'α':'')+z).split('α')}
@@ -212,7 +131,7 @@ Update(){List(this.u).forEach((x)=>{this.set(this.u[x],this.uv[this.u[x]])});thi
 compute(){this.r.f=this.source;this.r.Update()}
 init(x){this.r.init(x)}
 render(){this.r.render()}
-compile(){this.source='precision highp float;'+this.unif()+this.complex+this.custom+'bool isConv(vec2 z){return '+this.b+';}vec2 f(vec2 z,vec2 c){return '+this.f+';}vec3 color(float x,vec2 z,vec2 p){return vec3('+this.c+');}void main(){float ratio=min(center.x,center.y)/2.0;vec2 C=(c-center)/ratio;vec2 Z1=(gl_FragCoord.xy-center)/(ratio);vec2 zce=(ce-center)/ratio;vec2 Z=mix(zce,Z1,1.0/r);vec2 zb;vec2 z;vec2 c;'+this.i+'for(int i=0;i<100;i++){if(!isConv(z-p)){break;}I+=1.0;zb=z;z=f(z,c);p=zb;}'+this.tr+'vec3 COLOR=color(I,z,p);gl_FragColor=vec4(I==1.0?vec3(0):(useHSV>0.0?hsv(COLOR):COLOR),1.0);}'}
+compile(){this.source='precision highp float;'+this.unif()+this.complex+this.custom+'bool isConv(vec2 z){return '+this.b+';}vec2 f(vec2 z,vec2 c){return '+this.f+';}vec3 color(float x,vec2 z,vec2 p){return vec3('+this.c+');}void main(){float ratio=min(center.x,center.y)/2.0;vec2 C=(c-center)/ratio;vec2 Z1=(gl_FragCoord.xy-center)/ratio;vec2 zce=(ce-center)/ratio;vec2 Z=mix(zce,Z1,1.0/r);vec2 zb;vec2 z;vec2 c;'+this.i+'for(int i=0;i<100;i++){if(!isConv(z-p)){break;}else{I+=1.0;zb=z;z=f(z,c);p=zb;}}'+this.tr+'vec3 COLOR=color(I,z,p);gl_FragColor=vec4(I==1.0?vec3(0):(useHSV>0.0?hsv(COLOR):COLOR),1.0);}'}
 check(f){let gl=this.r.gl,shader=gl.createShader(gl.FRAGMENT_SHADER)
 gl.shaderSource(shader,f);gl.compileShader(shader);return gl.getShaderInfoLog(shader)}
 formula(key,x){this.history=this[key];this.ss=this.source;this[key]=this.float(x);this.compile();if(this.check(this.source).length){this[key]=this.history;this.source=this.ss}}
@@ -229,13 +148,13 @@ this.render()
 }
 dynamicViewport(){this.r.e.onmousewheel=(e)=>{e.preventDefault();this.zoom([e.offsetX,e.offsetY],1-e.deltaY/1000)}}
 }
-//}endutils
+
 
 
 var adjt=0
-var fr=new Fractal();fr.input({f:'F(z,c)',c:'x,x,x',u:['mode','inverted','R'],t:[1,1,2],v:{c:fr.ce(),r:1},b:'mode<1?M(z)<100:M(z)>0.01',tr:fr.deftr(),i:'if(inverted>0.0){Z=rec(Z);}z=Z;c=C;',custom:'vec2 F(vec2 z,vec2 c){return sqr(z)+c;}'});
+var fr=new Fractal();fr.input({f:'F(z,c)',c:'x,x,x',u:['mode','inverted','R','E'],t:[1,1,2,1],v:{c:fr.ce(),r:1},b:'mode<1?M(z)<100:M(z)>0.01',tr:fr.deftr(),i:'if(inverted>0.0){Z=rec(Z);}z=Z;c=C;',custom:'vec2 F(vec2 z,vec2 c){return sqr(z)+c;}'});
 var seed=fr.ce()
-fr.compile();fr.compute();fr.Set([0,0,fr.ce()]);fr.seed(fr.ce());fr.init('d');fr.viewport();fr.render();fr.dynamic((x)=>{if(adjt==0){fr.seed(x);seed=x}else if(adjt==1){fr.set('R',mult(subt(x,fr.ce()),2/Min(fr.ce())))}})
+fr.compile();fr.compute();fr.Set([0,0,fr.ce(),100]);fr.seed(fr.ce());fr.init('d');fr.viewport();fr.render();fr.dynamic((x)=>{if(adjt==0){fr.seed(x);seed=x}else if(adjt==1){fr.set('R',mult(subt(x,fr.ce()),2/Min(fr.ce())))}})
 fr.dynamicViewport()
 function update(key,x){fr.formula(key,x);fr.compute();fr.viewport();fr.seed(seed);fr.Update();fr.render()}
 function Update(key,x,y,z){fr.Formula(key,y,x,z);fr.compute();fr.viewport();fr.seed(seed);fr.Update();fr.render()}
@@ -246,15 +165,15 @@ E('color').onchange=function(){update('c',E('color').value.replace(/F/g,'F(z,c)'
 function setvalue(x){E(x).onchange=()=>{fr.set(x,+E(x).value)}}
 setvalue('mode');setvalue('inverted')
 fr.r.e.onclick=function(){adjt=(1+adjt)%3;E('adjt').innerHTML='Adjust type:'+['constant','relation number','fixed'][adjt]}
-var i_slice=()=>'float Cx=C.x;float Cy=C.y;float Zx=Z.x;float Zy=Z.y;vec4 ZC=vec4('+['Z,C','Zx,Cx,Zy,Cy','Zx,Cx,Cy,Zy','Cx,Zx,Zy,Cy','Cx,Zx,Cy,Zy','C,Z'][+E('slice').value]+');z=ZC.xy;c=ZC.zw;'
+var i_slice=()=>'float Cx=C.x;float Cy=C.y;float Zx=Z.x;float Zy=Z.y;vec4 ZC=vec4('+['Z,C','Zx,Cx,Zy,Cy','Zx,Cx,Cy,Zy','Cx,Zx,Zy,Cy','Cx,Zx,Cy,Zy','C,Z','Z,Z+C'][+E('slice').value]+');z=ZC.xy;c=ZC.zw;'
 E('slice').onchange=function(){fr.i='if(inverted>0.0){Z=rec(Z);}'+i_slice();fr.compile();fr.compute();fr.Update()
 fr.seed(seed);fr.viewport();fr.render()}
 var fractals='Julia set:z2+c&Nova fractal:2*z/3+{z2}/3+c&Burning ship fractal:sqr(abs(z))-c&Lambda fractal:{c,z-z2}&Magnet 1:sqr({z2+c-k;2*z+c-2*k})&Magnet 2:sqr(k+{cbr(z-k);sqr(c)+3*{z-k,z+c-k}})&Phoenix fractal:z2+{R,p}+c'.replaceAll('&','<br>')
 E('fractals').innerHTML=fractals
-var i_grad=()=>'if(I==100.0){I=1.0;}else{'+['I/=100.0','I=sqrt(I)/10.0','I=1.0-pow(1.1,-I)','I=log(I)/log(100.0)','I/=I+1.0','I=abs(sin(I/10.0))','I=mod(I/20.0,1.0)'][+E('grad').value]+';}'+['','I=smoothStep(I);'][+E('ss').value]
+var i_grad=()=>['','if(I<100.0){I-=loga(loga(M(z-p))*E);}'][+E('ss').value]+'if(I==100.0){I=1.0;}else{'+['I/=100.0','I=sqrt(I)/10.0','I=1.0-pow(1.1,-I)','I=log(I)/log(100.0)','I/=I+1.0','I=abs(sin(I/10.0))','I=mod(I/20.0,1.0)'][+E('grad').value]+';}'
 E('grad').onchange=function(){Update('tr',i_grad(),'','')}
 E('ss').onchange=E('grad').onchange
-
+E('b').onchange=function(){update('b',E('b').value)}
 </script>
 </body>
 </html>
