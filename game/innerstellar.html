@@ -1,0 +1,75 @@
+<html>
+<body>
+<canvas id='c' width='400' height='400'></canvas><br>
+<button onclick='game()'>start game</button>
+<button onclick='reset()'>reset</button>
+<script>
+function elem(x){return document.getElementById(x)}
+var ca=elem('c')
+var ctx=ca.getContext('2d')
+var P=[0,0,0],g=0,L=10,sv=1,s=0.4,spin=0,F=1,B=6,dt=0.05
+function A(x){return Math.sqrt(x[0]*x[0]+x[1]*x[1])}
+function Di(x,y){return A([x?.[0]-y?.[0],x?.[1]-y?.[1]])}
+var k=0
+function j1(x,y,z){return [y/x,z/x]}
+function j(x,y,z){return j1(x-P[0],y-P[1],z-P[2])}
+var m=Math.PI
+function v(){return (1+Math.max(0,Math.floor(lv()/4)))/3}
+function lv(){return Math.floor(-P[0]/(F*L))}
+function st(){return lv()%4}
+var pd=[[[0,0],[0,1]],[[-1,0],[0,0],[1,0]],[[-1,0],[0,0],[1,0],[0,1]],[[-1,0],[0,0],[1,0],[0,1],[0,-1]]]
+function p(r,t){return [r*Math.cos(t),r*Math.sin(t)]}
+function cpd(){return pd[st()]}
+function slice(x,y){let z=[];for(let i=0;i<y;i++){z[i]=x[i]};return z}
+function list(t,x,y){let z=[];for(let i=0;i<y;i++){z[i]=t+i*x};return z}
+function rdm(x,y){return slice(list(0,1,x).sort(function(){return 0.5-Math.random()}),y)}
+var substr=(x,y)=>(y||[]).map((i)=>x?.[i])
+function stage(){let x=[];for(let i=0;i<L;i++){x[i]=rdm(st()+2,rdm(st()+2,1)[0])};return x}
+function gs(){return -P[0]>=lv()*L*F&&-P[0]<=lv()*L*F+v()*dt}
+var sd=stage();gS=0
+function pos(x){return substr(cpd(),sd[x])}
+function posX(x){return -F*(x+1+L*lv())}
+function xp(){return P[0]-v()*dt}
+var to=[0,0]
+function tr(x){return (x+B)*200/B}
+function trs(x,y,t){return Di(x,y)==0?x:add(x,mult(add(y,mult(x,-1)),t/Di(x,y)))}
+function add(x,y){return [x[0]+y[0],x[1]+y[1]]}
+function mult(x,y){return [x[0]*y,x[1]*y]}
+function yzp(){return Di([P[1],P[2]],to)<dt?to:trs([P[1],P[2]],to,dt)}
+function u1(){P=[xp()].concat(yzp())}
+function u2(){spin=(spin+sv*dt)%(2*m)}
+function hex(x){return list(0,m/3,6).map(function(y){return add(x,p(s,y+spin))})}
+function u3(){if(gs()&&gS==0){sd=stage();gS=1;to=[0,0];P[2]=0;P[1]=0}}
+function u4(){if(gS>0){gS=(gS+1)%10}}
+function poly(x){ctx.beginPath();ctx.moveTo(tr(x[0])[0],tr(x[0])[1]);var y=1;while(y<=x.length){ctx.lineTo(tr(x[y%x.length][0]),tr(x[y%x.length][1]));y++};ctx.closePath()}
+function Hex(x,y,z){let t=[];for(let i=0;i<6;i++){let r=hex([y,z])[i];t[i]=j(x,r[0],r[1])};return t}
+function plotw(x){for(let i=0;i<pos(x).length;i++){poly(Hex(posX(x),pos(x)[i][0],pos(x)[i][1]));ctx.fill()}}
+function plotW(){for(let i=0;i<sd.length;i++){if(posX(i)<P[0]){plotw(i)}}}
+function plotp(x){for(let i=0;i<Pos(x).length;i++){poly(Hex(posX(x),Pos(x)[i][0],Pos(x)[i][1]));ctx.stroke()}}
+function plotP(){for(let i=0;i<sd.length;i++){if(posX(i)<P[0]){plotp(i)}}}
+//[1,0]==[1,0] is false,F  k ya.
+var equal=(x,y)=>x.toString()==y.toString()
+function In(x,y){return (y??[]).some((z)=>equal(z,x))}
+function exstr(x,y){let z=[],j11=0;for(let i=0;i<x.length;i++){if(!In(i,y)){z[j11]=x[i];j11++}};return z}
+function Pos(x){return exstr(cpd(),sd[x])}
+function setc(x,y,z){ctx.fillStyle='rgb('+x+','+y+','+z+')';ctx.strokeStyle='rgb('+x+','+y+','+z+')'}
+function ind(x,arr){let y=-1,j=Infinity;for(let i=0;i<arr.length;i++){let z=Math.abs(arr[i]-x);if(z<j&&z<dt*v()){j=z;y=i};if(j==0){break}};return y}
+function Ind(){return ind(P[0],list(0,1,L).map(posX))}
+function min(x){let y=Infinity;for(i of x){if(i<y){y=i}};return y}
+function nd(){let x=Ind();if(x<0){return 1/0}else{return min(pos(x).map(function(t){return Di([P[1],P[2]],t)}))}}
+function u5(){if(nd()<s){g=1}}
+function plotg(){if(posX(L-1)<P[0]){let x=posX(L-1);poly([j(x,-2,-2),j(x,-2,2),j(x,2,2),j(x,2,-2)]);ctx.fill()}}
+function plot(){ctx.clearRect(0,0,400,400);setc(0,0,0);plotg();setc(0,0,128);plotW();plotP()}
+
+
+function game(){if(g==0){u1();u3();u4();u5()};u2();plot();window.requestAnimationFrame(game)}
+function reset(){g=0;P=[0,0,0];to=[0,0];gS=0;plot()}
+function moveU(){return In(add(to,[0,1]),cpd())}
+function moveD(){return In(add(to,[0,-1]),cpd())}
+function moveR(){return In(add(to,[1,0]),cpd())}
+function moveL(){return In(add(to,[-1,0]),cpd())}
+function toU(){return add(to,[0,1])};function toD(){return add(to,[0,-1])};function toR(){return add(to,[1,0])};function toL(){return add(to,[-1,0])}
+document.onkeydown=function(event){var event=event||window.event,x=event.keyCode;if(x==39&&moveL()){to=toL()}else if(x==38&&moveU()){to=toU()}else if(x==37&&moveR()){to=toR()}else if(x==40&&moveD()){to=toD()}}
+</script>
+</body>
+</html>
