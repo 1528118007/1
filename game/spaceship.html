@@ -1,0 +1,378 @@
+<html>
+<body>
+
+<canvas id='c'></canvas>
+<div id='comp'></div>
+<button onclick='game()'>1</button>
+
+<script>
+var el=(x)=>document.getElementById(x)
+var ca=el('c'),ctx=ca.getContext('2d')
+
+//#utils ARRAY
+var list=(x,y,n)=>n>1?list(x,y,n-1).concat([x+y*(n-1)]):n?[x]:[];
+var toString=JSON.stringify;
+var List=(x)=>list(0,1,x.length);
+var Le=(x)=>x.length;
+var reduce=(x,i,f)=>[i].concat(x).reduce(f);
+var substr=(x,y)=>y.map((i)=>x[i]);
+var sort=(x,y)=>substr(x,List(y).sort((z,t)=>y[z]-y[t]));
+var Min=(x)=>reduce(x,1/0,(y,z)=>y<z?y:z);
+var Max=(x)=>reduce(x,-1/0,(y,z)=>y>z?y:z);
+var iMin=(x)=>reduce(List(x),1/0,(y,z)=>x[y]<x[z]?y:z);
+var total=(x)=>reduce(x,0,(y,z)=>y+z);
+var equal=(x,y)=>toString(x)==toString(y);
+var In=(x,y)=>y.some((z)=>equal(x,z));
+function rdm(x){if(!x){return Math.random()}else{return list(0,1,x).map(Math.random)}};
+var union=(x)=>reduce(x,[],(y,z)=>y.concat(z));
+var modify=(x,i,n,r)=>x.slice(0,i).concat(r,x.slice(i+n));
+var map2f=(x,y,f)=>List(x).map((i)=>f(x[i],y[i],i));
+var un=(x)=>JSON.parse(toString(x));
+var add=(x,y)=>map2f(x,y,(z,t)=>z+(t??y));
+var subt=(x,y)=>map2f(x,y,(z,t)=>z-(t??y));
+var mult=(x,y)=>map2f(x,y,(z,t)=>z*(t??y));
+var Add=(x,y)=>map2f(x,y,(z,t)=>add(z,y[0]-1==y[0]-1?y:t));
+var Subt=(x,y)=>map2f(x,y,(z,t)=>subt(z,y[0]-1==y[0]-1?y:t));
+var Mult=(x,y)=>map2f(x,y,(z,t)=>mult(z,(t??y)));
+var clone=(x,n)=>substr([x],list(0,0,n));
+var Rep=(x,f)=>union(map2f(x,[0],(z,t,i)=>clone(z,f(i))));
+var rep=(x,n)=>Rep(x,()=>n);
+var exstr=(x,y)=>x.filter((z,t)=>!In(t,y));
+var unique=(x)=>x.filter((y,z)=>!In(y,x.slice(0,z-1)));
+var shuffle=(x)=>x.sort(()=>0.5-rdm());
+var Total=(x)=>reduce(x,[0,0],add);
+var expa=(x,y,f)=>union(x.map((z)=>y.map((t)=>f(z,t))));
+var expp=(x,y,i)=>[x[Math.floor(i/Le(y))],y[i%Le(y)]];
+var amount=(x,n)=>x.filter((y)=>y==n).length;
+var iter=(f,x,n)=>reduce(list(0,0,n),x,f);
+function itef(f,x,y){list(x,1,y-x+1).forEach(f)};
+var dot=(x,y)=>total(mult(x,y));
+var lerp=(x,y,t)=>add(x,mult(subt(y,x),t));
+var M=(x)=>Math.sqrt(dot(x,x));
+var ref=(x,y)=>!y[0]&&!y[1]?x:subt(x,mult(y,2*dot(x,y)/dot(y,y)));
+var arg=(x,y)=>Math.acos(dot(x,y)/(M(x)*M(y)));
+var cross=(x,y)=>[x[1]*y[2]-x[2]*y[1],x[2]*y[0]-y[2]*x[0],x[0]*y[1]-y[0]*x[1]];
+var mean=(x)=>total(x)/Le(x);
+var centroid=(x)=>mult(Total(x),1/Le(x));
+var sample=(x,t)=>shuffle(x).filter((y,z)=>z<t);
+var al=(x,y)=>x[0]-1==x[0]-1?add(x,y):Add(x,y);
+var sl=(x,y)=>x[0]-1==x[0]-1?subt(x,y):Subt(x,y);
+var ml=(x,y)=>x[0]-1==x[0]-1?mult(x,y):Mult(x,y);
+var filter=(x,y,f)=>List(x).filter((i)=>f(y[i])).map((i)=>x[i])
+//#endutils
+
+
+//#utils CONTEXT_2D
+var w=window.innerWidth,h=window.innerHeight;
+var conj=(x)=>[x[0],-x[1]]
+var tr=(x)=>add(vp.c,mult(conj(x),vp.r)),tr1=(x)=>conj(mult(subt(x,vp.c),1/vp.r));
+var vp={c:[w/2,h/2],r:h/20}
+function poly1(c,x,t){c.beginPath();c.moveTo(x[0][0],x[0][1]);list(1,1,Le(x)-1).forEach(function(i){c.lineTo(x[i][0],x[i][1])});c.closePath();c[['fill','stroke'][t?1:0]]()};
+var poly=(c,x,t)=>poly1(c,x.map(tr),t);
+var pi=Math.PI,tau=2*pi;
+function setrgb(c,x,t){c[(t?'stroke':'fill')+'Style']='rgba('+x[0]+','+x[1]+','+x[2]+','+(x[3]||1)+')'};
+function arc(c,x,r,t1,t2){c.arc(tr(x)[0],tr(x)[1],Math.abs(r)*vp.r,t1,t2)};
+function circle(c,x,r,t){c.beginPath();arc(c,x,r,0,tau);c.closePath();c[t?'stroke':'fill']()};
+var setview=(r)=>(vp={c:[w/2,h/2],r:h/(r*2)});
+function zoom(c,r){vp.c=add(vp.c,mult(c,(1-r)*vp.r));vp.r*=r};
+var Circle=(c,x,r,t)=>x.forEach((y)=>circle(c,y,r,t));
+function square(c,x,r,t){c[t?'strokeRect':'fillRect'](...tr([x[0]-r,x[1]+r]),2*r*vp.r,2*r*vp.r)}
+//#endutils
+
+
+//#utils OBJECT
+function o_extend(x,n,f){Object.defineProperty(x.prototype||x,n,{value:f})};
+function o_cons(k,x){let o={};itef((i)=>{o[k[i]]=x[i]},0,L(k)-1);return o};
+function o_des(o){let k=x=[];for(let i in o){k.push(i);x.push(o[i])};return [k,x]};
+function o_map2f(x,y,f){let z=x;for(let i in y){z[i]=f(x[i],y[i])};return z};
+var o_union=(x,y)=>o_map2f(x,y,(z,t)=>t),o_add=(x,y)=>o_map2f(x,y,(z,t)=>z+t)
+function o_unload(o,x){let keys=Object.getOwnPropertyNames(o);let y='';keys.forEach((i)=>{y+='var '+i+'='+x+'.'+i+';'});return y;};
+//#endutils
+
+ca.width=w;ca.height=h
+eval(o_unload(Math,'Math'))
+
+var polar=(r,t)=>[r*cos(t),r*sin(t)],sgn=(x)=>x>0?1:-1
+var pla=[0,0],m=10,p_s=.1,s_s=.2
+var iv=(x,s)=>abs(x[0])<=m-s&&abs(x[1])<=m-s
+var bd=[],Bd=[],pd=[],sd=[],stage=0,dt=.05
+
+//INITS.
+var Ib=(p,d,n,v)=>[p,v,n,d[4][1]||0,d[6]]
+var Is=(d)=>[0,0,d[0][0][2],0]
+function Ip(p,d,n,v,s){let x=clone(0,Le(d[1]));return [p,d[3]==1||d[3]==2?[0,0]:v,n,mult(d[1],d[8]?0:rdm()),d[5],x,x,x,clone(1,Le(d[1])),s]}
+var Di2=(x,y)=>(x[0]-y[0])*(x[0]-y[0])+(x[1]-y[1])*(x[1]-y[1])
+var Cl=(x)=>x.map((i)=>i>m?m:i<-m?-m:i)
+var bs=[],ps=[],ss=[],Fs=[]
+setview(11)
+
+Array.prototype.remove=function(i){this.splice(i,1)}
+Array.prototype.mod=function(i,x){return modify(this,i,1,[x])}
+
+//-----------stages!---------------
+//Simplifications.
+var Sbn=(v,c)=>[[[0,1,...c],[0,0],[s_s,0]],v,[0],0,[0],0,m*3/v,p_s]
+var SBn=(r,t,n,o)=>[list((o||0)-r,2*r/(t-1),t),clone(n,t),0,[0,0],[1,0],[0]]
+var Ssp=(c,x)=>[[0,0,...c],[-x,x],[-x,-x],[2*x,0]]
+var Ssb=(c,x)=>[[0,0,...c],[-2*x,x],[-x,0],[-2*x,-x],[x,0]]
+var Ssd=(c,x)=>[[0,0,...c],[x,0],[0,x],[-x,0],[0,-x]]
+var Ssc=(c,r,t)=>[[1,t||0,...c],[0,0],[r,0]]
+var Ssw=(c,x)=>[[0,0,...c],[0,0],[x,x],[-x,0],[x,-x]]
+
+//lv1
+bd[0]=Sbn(3,[1,0,0]);Bd[0]=[[-pi/2],[0],0,[0,0],[1,0],[0]];Bd[1]=Bd[0].mod(0,[4]);Bd[2]=SBn(-pi/4,5,0,4+tau);pd[0]=[Ssp([1,0,0],.3),[3],[0],1,3,10,[0],.2];pd[1]=[pd[0][0],[2],[1],0,0,15,[0],.2];pd[2]=[Ssb([1,1,0],.6),[2.5],[2],1,2,50,[0],.4];sd[0]=[[[1,0,1],[0],[3]],[[1,0,1],[0,1],[5,2]],[[1,0,1],[2],[1]]]
+//lv2
+Bd[3]=SBn(pi/8,5,0,-pi/2);Bd[4]=Bd[0].mod(3,[-1,0]);Bd[5]=Bd[0].mod(3,[1,0]);pd[3]=[Ssp([.5,.5,.5],.3),[6],[3],1,2,20,[[0]],.3];pd[4]=[Ssb([.5,.5,.5],.6),[1/6,1/6,3],[4,5,2],1,1,60,[0],.5];sd[1]=[[[1,2,5],[3],[1]],[[1,0,1],[3,1],[5,8]],[[1,0,1],[4],[1]]]
+//lv3
+sd[2]=[[[1,10,5],[0,1,3],[3,3,3]],[[2,0,1],[1],[5]]]
+//lv4
+Bd[6]=[[-pi*.62,-pi*.38],[0,0],0,[0,0],[3,.3],[0]];pd[5]=[Ssd([.5,.5,.5],.3),[2],[6],1,2,30,[0],.2];pd[6]=[Ssd([.3,.3,.3],.6),[1,2],[3,1],1,2,80,[0],.5];sd[3]=[[[1,5,3],[3,5],[3,2]],[[1,8,10],[3,5],[1,1]],[[1,0,1],[6],[1]]]
+//lv5
+pd[7]=[Ssp([1,.5,0],.2),[1],[0],3,3,30,[0],.2];pd[8]=[Ssb([1,.5,0],.4),[1],[1],1,2,40,[0],.3];sd[4]=[[[1,0,1],[3,5,7],[3,3,1]],[[1,1,2],[3,5,7],[3,4,2]],[[1,0,1],[8],[5]]]
+//lv6
+pd[9]=[Ssp([0,1,0],.3),[1],[1],3,3,40,[0],.2];Bd[7]=SBn(2*pi/3,3,0,0);pd[10]=[Ssb([1,1,0],.6),[.3,2],[7,2],1,5,150,[[1,pi/3],[0]],.5];sd[5]=[[[0,1,7],[9],[1]],[[1,0,1],[3,5],[5,5]],[[1,0,1],[9,10],[1,1]]]
+//lv7
+bd[1]=[[[1,0,.5,.5,.5],[0,0],[.8,0]],1,[0],0,[0],0,25,.8];Bd[8]=[[-pi/2],[1],0,[0,0],[1,0],[0]];pd[11]=[Ssp([.7,.7,.7],.3),[5],[8],1,3,50,[0],.3];sd[6]=[[[1,10,3],[11,3,5,9],[2,2,2,1]]]
+//lv8
+Bd[9]=Bd[4].mod(0,[4]).concat([1]);Bd[10]=Bd[5].mod(0,[4]).concat([1]);pd[12]=[pd[0][0],[.5,.5],[9,10],1,3,50,[0],.3];sd[7]=[[[1,5,20],[3,12],[1,1]]]
+//lv9
+bd[2]=bd[0].mod(2,[1,1]).mod(6,30);Bd[11]=Bd[1].mod(1,[2]);Bd[12]=SBn(-5*pi/6,6,0,0).mod(3,[-2,0]);Bd[13]=Bd[12].mod(3,[2,0]);pd[13]=[Ssb([1,0,0],.7),[.5,.5,3],[12,13,11],1,3,200,[0],.5];sd[8]=[[[1,15,5],[3,5,9,12],[1,1,1,1]],[[1,0,1],[13],[1]]]
+//lv10!
+bd[3]=[[[1,0,1,0,0],[0,0],[p_s,0]],1.5,[0],0,[0],0,20,p_s];bd[4]=Sbn(5,[1,1,0]);Bd[14]=SBn(pi/8,5,3,-pi/2);Bd[15]=[[4],[4],0,[0,0],[3,.2],[0]];Bd[16]=SBn(3*pi/8,11,3,-pi/2);Bd[17]=SBn(pi/8,5,4,4+tau);pd[14]=[Ssp([1,1,0],.4),[2.5],[14],1,3,80,[0],.3];pd[15]=[Ssp([0,.3,0],.3),[3],[15],1,3,50,[0],.2];pd[16]=[Ssb([.8,.8,.8],.4),[3,1.4],[16,2],1,2,300,[0],.4];pd[17]=[Ssb([.8,.8,0],.4),[3],[17],1,2,100,[0],.4];sd[9]=[[[1,10,3],[9,14],[2,2]],[[1,0,1],[14,15],[2,5]],[[1,0,1],[9,14,15],[3,3,3]],[[1,0,1],[16,17],[1,2]]]
+//lv11
+Bd[18]=SBn(pi/8,5,4,-pi/2);pd[18]=[Ssb([1,.5,0],.6),[.3,2,2.5],[7,2,18],1,5,250,[[1,pi/3],[0],[0]],.5];sd[10]=[[[1,20,5],[11,14,15,12],[1,2,2,2]],[[1,0,1],[18],[1]]]
+//lv12
+Bd[19]=Bd[3].mod(3,[-1,0]);Bd[20]=Bd[3].mod(3,[1,0]);pd[19]=[Ssp([.3,.3,.3],.3),[5,5],[19,20],1,3,75,[0],.2];sd[11]=[[[1,2,5],[19],[1]],[[1,0,1],[19,15],[5,8]]]
+//lv13
+sd[12]=[[[1,10,5],[14,15,19],[3,3,3]],[[2,0,1],[15],[5]]]
+//lv14
+pd[20]=[Ssb([1,.5,.5],.5),[2,2,1],[19,20,2],1,2,250,[0],.4];sd[13]=[[[1,0,1],[19,12,7],[3,3,1]],[[1,1,2],[19,12,7],[3,4,2]],[[1,0,1],[20],[1]]]
+//lv15!
+Bd[21]=SBn(-7*pi/8,8,0,0);Bd[22]=[[],[],0,[0,0],[1,0],[1,9]];pd[21]=[Ssc([.3,.3,.3],1),[10,1],[22,21],1,1,500,[[0],[1,pi/8]],1];sd[14]=[sd[0][0],[[1,0,1],[21],[1]]]
+//MORE BULLETS ! ! ! !
+bd[5]=[Ssc([1,0,0],.3),3,[0],21,[2,3],0,5,.3];bd[6]=bd[2].mod(6,10);bd[7]=Sbn(3,[0,0,1]);Bd[23]=SBn(5*pi/6,6,7,0);bd[8]=[Ssc([0,0,1],.2),3,[0],23,[1,2],0,10,.2];bd[9]=Sbn(3,[0,1,0]).mod(2,[2,1]).mod(6,10);Bd[24]=SBn(pi/8,3,0,0);bd[10]=Sbn(3,[1,0,0]).mod(3,24).mod(4,[3,0,1]);bd[11]=Sbn(3,[1,.5,0]).mod(3,2).mod(4,[3]);bd[12]=Sbn(3,[1,0,1]).mod(5,10)
+//lv16
+sd[15]=[[[0,1,8],[15],[1]],[[1,0,1],[15],[5]]]
+//lv17
+sd[16]=[[[1,0,1],[14,15],[5,2]],[[2,1,5],[15],[2]]]
+//lv18
+sd[17]=[[[1,0,1],[9,15],[4,4]],[[0,0,1],[9,14],[6,1]]]
+//lv19
+sd[18]=[[[1,3,10],[15],[2]]]
+//lv20
+pd[22]=pd[21].mod(1,[15,1,5]).mod(2,[22,21,8]);sd[19]=[sd[14][0],[[1,0,1],[22],[1]]]
+//lv21
+pd[23]=[Ssd([0,0,.7],.3),[.3],[7],1,5,100,[[1,pi/3]],.3];sd[20]=[[[1,10,3],[19,23],[3,1]],[[1,0,1],[23],[5]]]
+//lv22
+pd[24]=[Ssd([0,.7,0],.3),[1],[21],1,5,100,[[1,pi/8]],.3];sd[21]=[[[1,10,3],[23,24],[3,1]],[[1,0,1],[24],[5]]]
+//lv23
+pd[25]=[Ssp([0,1,1],.3),[3],[2],3,3,100,[0],.3];Bd[26]=SBn(0,1,12,4+tau);pd[26]=[Ssb([0,1,1],.5),[.2],[26],1,2,250,[0],.4];sd[22]=[[[1,0,1],[25,23],[1,3]],[[1,0,1],[26],[1]]]
+//lv24
+pd[27]=pd[10].mod(1,[.3,1]).mod(2,[7,17]).mod(5,300);sd[23]=[[[1,0,1],[24],[2]],[[2,0,1],[25],[7]],[[1,0,1],[27],[1]]]
+//lv25
+Bd[25]=Bd[0].mod(1,[5]);pd[28]=pd[0].mod(2,[25]).mod(5,150);sd[24]=[[[1,15,5],[28,25],[2,1]]]
+//lv26
+sd[25]=[[[1,15,5],[25,28],[3,3]]]
+//lv27
+bd[13]=[bd[4][0],4,[1,1.2],0,[0],0,10,p_s];Bd[27]=SBn(pi/8,5,13,4+tau);pd[29]=pd[27].mod(2,[7,27]);sd[26]=[[[1,2,5],[28],[1]],[[1,0,1],[29],[1]]]
+//lv28
+sd[27]=[[[1,2,5],[28,15],[1,1]],[[1,1,4],[7,9,25],[1,1,1]]]
+//lv29
+Bd[28]=SBn(pi/8,5,6,4+tau);pd[30]=[Ssp([.6,0,0],.3),[3],[28],2,4,120,[0],.3];sd[28]=[[[1,10,5],[28,30],[2,1]],[[1,0,1],[30],[5]]]
+//lv30
+Bd[29]=Bd[22].mod(5,[1,25]);pd[31]=pd[22].mod(2,[29,21,8]);sd[29]=un(sd[19]);sd[29][1][1]=[31]
+//lv31
+pd[32]=[Ssp([0,1,1],.4),[10],[29],0,0,150,[0],.3];sd[30]=[[[1,0,1],[32,28,23],[1,2,2]],[[1,5,3],[32,24],[1,1]]]
+//lv32
+sd[31]=[[2,4,6],[8,10,13],[16,18,20],[26,27,29]].map((i)=>[[1,0,1],i,clone(1,i.length)])
+//lv33
+Bd[30]=SBn(2*pi/3,3,6,0);Bd[31]=SBn(7*pi/8,8,6,0);pd[33]=pd[23].mod(2,[30]);pd[34]=pd[24].mod(2,[31]);sd[32]=[[[1,10,3],[33,34],[1,1]],[[1,0,1],[34],[3]]]
+//lv34
+pd[35]=[Ssb([0,.4,.4],.4),[1],[28],3,4,350,[0],.3];sd[33]=[[[1,10,5],[28,30],[3,1]],[[1,0,1],[35],[1]]]
+//lv35
+bd[14]=Sbn(10,[0,1,.5]);Bd[32]=SBn(pi/4,15,14,4+tau);bd[15]=[[[0,1,0,1,.5],[-s_s,0],[s_s,0]],3,[0],32,[3],0,10,p_s];bd[16]=[[[1,0,.3,0,0],[0,0],[1,0]],3,[1,1],0,[0],66,6666,1];Bd[33]=SBn(0,1,15,4+tau);Bd[34]=SBn(0,1,16,4+tau);pd[36]=[Ssb([0,1,.5],.5),[2],[33],1,3,222,[0],.4];pd[37]=[Ssb([.3,0,0],.5),[6666],[34],1,3,222,[0],.4,1];sd[34]=[[[1,0,1],[30,32],[5,2]],[[1,0,1],[36,37],[1,1]]]
+//lv36
+Bd[35]=SBn(pi/8,5,5,-pi/2);pd[38]=[Ssb([1,0,0],.5),[3],[35],1,3,400,[0],.4];sd[35]=[[[1,0,1],[32],[3]],[[1,0,1],[38],[1]]]
+//lv37
+Bd[36]=SBn(pi/8,3,8,-pi/2);pd[39]=[Ssp([0,0,1],.3),[5],[36],1,6,120,[0],.3];sd[36]=[[[1,5,10],[39],[1]]]
+//lv38
+pd[40]=[Ssd([.7,.7,0],.3),[.3,.3],[7,7],1,5,150,[[1,-pi/3],[1,pi/3]],.3];sd[37]=[[[2,0,1],[40],[3]],[[1,0,1],[30,40],[3,1]]]
+//lv39
+pd[41]=[Ssd([0,.7,.7],.3),[.3,1],[7,21],1,5,150,[[1,pi/3],[1,pi/8]],.3];sd[38]=[[[2,0,1],[41],[3]],[[1,0,1],[30,41],[3,1]]]
+//lv40!
+var co1=[.7,0,.7],sh1=[[0,1,...co1],[-s_s,0],[s_s,0]]
+bd[17]=Sbn(4,co1).mod(5,.3);Bd[37]=SBn(pi/8,5,17,4+tau);bd[18]=[[[1,0,...co1],[0,0],[.2,0]],3,[1,.8],37,[1,2],0,10,.2];bd[19]=[[[1,0,...co1],[0,0],[2,0]],1e-5,[0],0,[0],0,dt,2];Bd[38]=SBn(.98*pi,50,17,0);Bd[39]=SBn(5*pi/6,6,18,0);Bd[40]=SBn(0,1,19,0);
+bd[21]=[sh1,5,[0],38,[3],0,10,p_s];bd[22]=bd[21].mod(3,40);bd[20]=bd[21].mod(3,39);Bd[55]=SBn(0,1,20,4+tau);Bd[56]=SBn(0,1,21,4+tau);Bd[57]=SBn(0,1,22,4+tau);pd[42]=[Ssb(co1,.5),[5],[57],0,0,200,[0],.5];pd[43]=pd[42].mod(1,[6]).mod(2,[55]);pd[44]=pd[42].mod(1,[7]).mod(2,[56]);sd[39]=[sd[19][0],[[2,0,1],[42,43,44],[1,1,1]]]
+//lv41
+var SB1=(D,r)=>[[D],[3],1,polar(-r,D),[1,0],[0]]
+Bd[41]=SB1(0,3);Bd[42]=SB1(pi/2,3);Bd[43]=SB1(pi,3);Bd[44]=SB1(-pi/2,3);bd[23]=[[[1,1,...co1],[0,0],[2,0]],1e-5,[0],40,[2,2],0,3,-20/3];Bd[45]=SBn(0,1,23,0).mod(2,1);pd[45]=[Ssp([1,.5,.5],.3),clone(2,4),list(41,1,4),1,3,150,[0],.3];pd[46]=[Ssb([.5,.5,1],.4),[0.01],[45],1,3,420,[0],.4];sd[40]=[[[0,0,1],[45],[5]],[[2,0,1],[32,46],[1,1]]]
+//lv42
+Bd[46]=SBn(2*pi/3,3,5,0);pd[47]=pd[23].mod(2,[46]).mod(5,420);sd[41]=[[[1,15,3],[39,41],[2,1]],[[1,0,1],[47],[1]]]
+//lv43
+pd[48]=[Ssp([1,1,0],.3),[.3],[0],1,2,130,[[2,pi/8,-pi/8,pi/8]],.3];bd[24]=un(bd[19]).mod(7,100);bd[24][0][2]=[100,0];Bd[47]=SBn(0,1,24,0);bd[25]=[[[0,0,...co1],...ml([[-2,1],[-2,-1],[2,0]],.2)],1/4,[0],47,[3],0,100,.2];Bd[48]=SBn(0,1,25,-pi/2);pd[49]=[Ssb([1,0,1],.5),[.5,100],[17,48],0,0,430,[0],.5,1];sd[42]=[[[1,0,1],[48,45],[3,3]],[[1,5,7],[48],[1]],[[2,0,1],[49],[1]]]
+//lv44
+Bd[49]=SBn(pi/8,5,9,4+tau);Bd[50]=SBn(0,1,11,-pi/2);pd[50]=[Ssw([0,1,0],.3),[3],[49],2,5,144,[0],.3];pd[51]=[Ssb([1,.5,0],.4),[.3],[50],1,1,444,[[3,-pi,pi]],.4];sd[43]=[[[1,15,3],[48,50],[1,2]],[[1,0,1],[51],[1]]]
+//lv45
+var SB2=(n)=>[[-pi/2],[n],0,[0,0],[7,.1],[0]],Sp1=(s,c,n,h)=>[Ssp(c,s),[5],[n],1,3,h,[[3,-pi/8,pi/8]],s*0.8]
+Bd[51]=SB2(0);Bd[52]=SB2(6);Bd[53]=SB2(1);Bd[54]=SB2(8);pd[52]=Sp1(.3,[1,0,0],51,90);pd[53]=Sp1(.4,[1,.3,0],52,120);pd[54]=Sp1(.5,[.6,.6,.6],53,180);pd[55]=Sp1(.6,[0],54,480).mod(0,Ssb([0,0,1],.6));sd[44]=[[[52,53],[3,1]],[[53,54],[3,1]],[[52,53,54],[2,2,2]],[list(52,1,4),clone(1,4)]].map((i)=>[[1,0,1],...i])
+//lv46
+var Sp2=(s,c,n,h,i)=>[i?Ssb(c,s):Ssp(c,s),[.3],[n],1,3,h,[0],s*0.8]
+pd[56]=Sp2(.3,[1,0,0],0,100);pd[57]=Sp2(.3,[1,1,0],58,120);pd[58]=Sp2(.3,[.5,0,0],0,100).mod(3,3);pd[59]=Sp2(.4,[1,.4,0],50,450);Bd[58]=SBn(0,1,6,-pi/2);sd[45]=[[[1,10,3],[56,57],[2,2]],[[1,0,1],[58,59],[2,1]]]
+//lv47
+var Sp3=(x,c)=>[Ssw(c,.3),[2],[[1,11,65,59,60][x]],1,2,10*(x+1),[0],.3,0,x?[x+60,x+60]:0]
+Bd[59]=SBn(0,1,8,4+tau);Bd[60]=SBn(0,1,5,4+tau);itef((i)=>(Bd[i]=[[],[],0,[0,0],[1,0],[1,i-1]]),61,64);Bd[65]=SBn(0,1,9,4+tau);pd[60]=Sp3(0,[1,0,0]);pd[61]=Sp3(1,[1,.3,0]);pd[62]=Sp3(2,[0,1,0]);pd[63]=Sp3(3,[0,0,1]);pd[64]=Sp3(4,[1,1,0]);sd[46]=[[[1,0,1],[64],[3]]]
+
+
+//MOVEMENTS.
+var ad=(c,v)=>add(c,mult(v,dt))
+var nb=(x,s)=>abs(x[1])>abs(x[0])?[x[0],(m-s)*sgn(x[1])]:[(m-s)*sgn(x[0]),x[1]]
+function ab(c,v,s){let n=subt(c,nb(c,0)),h=!iv(c,s),v1=h?ref(v,n):v,p1=ad(h?nb(c,s):c,v1);
+return {p:p1,v:v1,h:h}}
+var as=(c,v)=>({p:Cl(ad(c,v)),v:v})
+var rn=(x,y,t)=>t?add(x,mult(rdm(t),y-x)):x+rdm()*(y-x)
+var tp=(p)=>atan2(pla[1]-p[1],pla[0]-p[0])
+
+
+
+//LAUNCHES.
+function lb(p,n,D){bs.push(Ib(p,bd[n],n,polar(bd[n][1],D)))}
+function lp(p,n,v,s){ps.push(Ip(p,pd[n],n,v,s))}
+function spawn(t,k,n){for(let i=0;i<t;i++){let v=polar(pd[n][4],rn(0,tau)),p=k==2?[0,0]:[rn(1-m,m-1),rn(k?0:1-m,m-1)];lp(p,n,v,1)}}
+function lB(p,d,D){let x=add(p,d[3]),y=d[6]?p:x;for(let i=0;i<Le(d[1]);i++){lb(x,d[1][i],d[0][i]+(D||0)+(d[0][i]>=4?tp(y)-4:0));};
+if(d[5][0]==1){let n=d[5][1],vel=pd[n][4],v=polar(vel,rn(0,tau));lp(p,n,v,0)}
+}
+
+function lB1(s){let x=pd[s[2]][9];if(!x){return 0}List(x).forEach((i)=>lB(s[0],Bd[x[i]],s[7][i]))}
+
+//MoVeMeNtS.
+var Mr=.1
+function mb(s,d){let s1=un(s),d1=un(d);let p=s1[0],v=s1[1],i=d1[2],out={p:p,v:v,h:!1};switch(i[0]){
+case 0:out=ab(p,v,p_s);break
+case 1:out=ab(p,v,p_s);if(out.h){out.v=mult(out.v,i[1])};break
+case 2:out=ab(p,v,p_s);if(out.h){let vec=subt(pla,out.p);out.v=mult(vec,(out.h?i[1]:1)*M(out.v)/M(vec))};break
+}
+return out}
+function mp(s,d){let s1=s,d1=d;let p=s1[0],v=s1[1],i=d1[3],vel=d1[4],r;switch(i){
+case 0:return {p:p,v:[0,0]}
+case 1:r=rdm()<Mr?polar(rn(0,vel),rn(0,tau)):[0,0];return ab(p,ad(v,r),p_s)
+case 2:r=rdm()<Mr?polar(vel,rn(0,tau)):[0,0];return ab(p,ad(v,r),p_s)
+case 3:return ab(p,v,p_s)
+case 4:let vec=subt(pla,p),v1=mult(vec,vel/M(vec));return as(p,v1)}}
+
+var cpl=false,pD=3,pV=5,pA=.15,pR=pi/16,pN=5,ple=pA
+//Detecti0ns.
+var Pb=[],g=false,plh=.2
+
+var TEST_MODE=false
+//pD=10
+
+function detP(){for(let i=0;i<Le(bs);i++){let z=plh+bd[bs[i][2]][7];if(z>0&&Di2(pla,bs[i][0])<z*z&&!TEST_MODE){g=true;break}}}
+function detE(){let L=Le(Pb),L1=Le(ps);for(let i=0;i<L1;i++){
+let z=pd[ps[i][2]][7],n=0;
+for(let j=0;j<L;j++){
+if(Di2(Pb[j][0],ps[i][0])<z*z){n++;Pb.remove(j);j--;L--}
+}
+ps[i][4]-=n*pD;if(ps[i][4]<1){if(ps[i][9]){ss[3]++}lB1(ps[i]);ps.remove(i);i--;L1--;}
+}
+}
+function Ep(t){let s=un(ps[t]),d=un(pd[s[2]]),moved=mp(s,d);s[0]=moved.p;s[1]=moved.v;List(s[3]).forEach((i)=>{
+s[6][i]-=dt;s[3][i]-=dt;let x1=d[6][i],BOOL=false
+let x=un([Bd[d[2][i]][2]?pla:s[0],Bd[d[2][i]],s[7][i]]);let xx=x[1][4]
+if(s[6][i]<=0&&s[5][i]>1){s[6][i]=xx[1];s[5][i]--;lB(...x);BOOL=true}
+
+if(s[3][i]<=0){s[3][i]=d[1][i];s[6][i]=xx[1];s[5][i]=xx[0];lB(...x);BOOL=true}
+
+if(d[6][0]){
+switch(d[6][i]?.[0]){
+case 0:break
+case 1:s[7][i]=(s[7][i]+dt*d[6][i][1])%tau;break
+case 2:s[7][i]<d[6][i][2]?(s[8][i]=1):s[7][i]>d[6][i][3]?(s[8][i]=-1):0;s[7][i]+=s[8][i]*dt*d[6][i][1];break
+case 3:if(BOOL) s[7][i]=rn(x1[1],x1[2])
+}
+}
+})
+
+ps[t]=s}
+function Eb(t){let s=un(bs[t]),d=bd[s[2]],moved=mb(s,d);s[0]=moved.p;let vec=subt(pla,s[0]),x1=false,y=[s[0],Bd[d[3]],d[4][2]?atan2(s[1][1],s[1][0]):0];
+s[1]=M(vec)<d[5]?mult(vec,M(s[1])/M(vec)):moved.v
+if(s[3]<0){let x=un(d)[4][0];if(x==1||x==2){lB(...y)}x1=x==2;s[3]=d[4][1]||1}
+if(moved.h){let x=un(d)[4][0];if(x==3||x==4||(d[2][0]==0&&x==2)){lB(...y)}x1=x!=4&&d[2][0]==0}
+s[3]-=dt;s[4]-=dt
+return {s:s,b:x1||s[4]<0}
+}
+function Es(t){let d=sd[t],x=d[ss[0]],k=x[0][0];ss[1]-=dt;let b00l=stage==46
+if(ss[1]<=0&&ss[2]>0){ss[2]--;ss[1]=x[0][1];for(let i=0;i<Le(x[1]);i++){cpl||spawn(x[2][i],k,x[1][i])}
+}if((ss[3]>=x[0][2]*total(x[2])&&!b00l)||(!Le(ps)&&b00l)){ss=[ss[0]+1,0,d[min(ss[0]+1,Le(d)-1)][0][2],0];
+if(ss[0]>=Le(sd[stage])){ss[0]--;cpl=true}
+
+}}
+function Ef(i){let x=Fs[i];VB(x[1],bd[x[1][2]],x[0]);x[0]-=dt*2;return x[0]<0}
+
+//VISUALIZATI0NS.
+function Vs(s,t,D){let i=s[0],x=i[0],n=255
+setrgb(ctx,[n*i[2],n*i[3],n*i[4]],i[1]);switch(x){
+case 0:poly(ctx,s.slice(1).map(t),i[1]);break
+case 1:circle(ctx,t(s[1]),s[2][0],i[1]);break
+case 2:ctx.beginPath();arc(ctx,t(s[1]),s[2][0],D-s[2][1]/2,D+s[2][1]/2);ctx.stroke();break
+}
+}
+function Vs1(s,t,D,alp){let i=s[0],x=i[0],n=255
+setrgb(ctx,[n*i[2],n*i[3],n*i[4],alp],i[1]);switch(x){
+case 0:poly(ctx,s.slice(1).map(t),i[1]);break
+case 1:circle(ctx,t(s[1]),s[2][0],i[1]);break
+case 2:ctx.beginPath();arc(ctx,t(s[1]),s[2][0],D-s[2][1]/2,D+s[2][1]/2);ctx.stroke();break
+}
+}
+var rot=(x,t)=>[x[0]*cos(t)-x[1]*sin(t),x[0]*sin(t)+x[1]*cos(t)]
+var rot1=(x,v)=>mult([x[0]*v[0]-x[1]*v[1],x[0]*v[1]+x[1]*v[0]],1/M(v))
+var Vb=(s,d)=>Vs(d[0],(x)=>add(rot1(x,s[1]),s[0]),d[0][0][0]==2?atan2(s[1][1],s[1][0]):0)
+var VB=(s,d,alp)=>Vs1(d[0],(x)=>add(rot1(x,s[1]),s[0]),d[0][0][0]==2?atan2(s[1][1],s[1][0]):0,alp)
+var Vp=(s,d)=>Vs(d[0],(x)=>add([x[1],-x[0]],s[0]),-pi/2)
+var anim=0
+var psh=ml([[-1,-1],[1,-1],[0,2]],plh)
+
+
+
+//UI & GAME
+function U(){let p1=Le(ps),b1=Le(bs),f1=Le(Fs);Es(stage)
+
+for(let i=0;i<b1;i++){let x=Eb(i);if(x.b){Fs.push([1,bs[i]]);bs.remove(i);i--;b1--}else{bs[i]=x.s}}
+for(let i=0;i<p1;i++){Ep(i)}
+for(let i=0;i<f1;i++){let x=Ef(i);if(x){Fs.remove(i);i--;f1--}}
+detE();if(!g&&!anim){detP()}gP()}
+function restage(){g=!1;ss=Is(sd[stage]);bs=[];ps=[];cpl=g;anim=0}
+function nextstage(){if(stage+1>=Le(sd)){g||(el('comp').innerHTML='you have passed all the levels')}else{stage++}restage()}
+function game(){if((g||cpl)&&!anim){anim=dt}setrgb(ctx,[0,0,0]);ctx.fillRect(0,0,w,h);plot();U();PA();}
+function plot(){let x=[255,255,255]
+//SCENE.
+setrgb(ctx,x,1);square(ctx,[0,0],m,1);Pb.forEach((i)=>Vb(i,[[[0,1,1,1,1],[0,0],[s_s,0]]]))
+//BULLETS.
+bs.forEach((i)=>Vb(i,bd[i[2]]))
+//PLANES.
+ps.forEach((i)=>Vp(i,pd[i[2]]))
+//PLAYER.
+setrgb(ctx,x);poly(ctx,Add(psh,pla))
+}
+ca.onmousemove=(e)=>(pla=Cl(tr1([e.offsetX,e.offsetY])))
+function gP(){if(ple>0){ple-=dt}else{
+ple=pA;Pb=Pb.concat(list((1-pN)*pR/2,pR,pN).map((t)=>[pla,rot([0,pV],t)]))
+}
+let L=Le(Pb);for(let i=0;i<L;i++){let y=ad(...Pb[i]);if(iv(y,0)){Pb[i][0]=y}else{Pb.remove(i);i--;L--}}
+}
+function PA(){if(anim){anim+=dt}
+if(anim>=3) g?restage():nextstage()
+if(anim>0&&anim<1){setrgb(ctx,[255*g,0,255*(1-g),sqrt(1-anim)],1);square(ctx,pla,0.2+anim,1)}
+if(anim>=1&&anim<3){setrgb(ctx,[255,255,255,min(1,anim-1)]);ctx.fillRect(0,0,w,h)}
+}
+restage()
+
+setInterval(game,1000*dt)
+
+//debug.
+var dS=(x)=>(stage=x,restage())
+
+</script>
+
+
+</body>
+</html>
